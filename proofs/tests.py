@@ -8,7 +8,7 @@ from .models import Property,Photo,Version,Comment,Group,Profile
 from .views import add_version
 def upload(name='room.jpg'):
  im=Image.new('RGB',(1800,1200),'#8899aa');b=io.BytesIO();im.save(b,'JPEG',exif=b'Exif\x00\x00PRIVATE');return SimpleUploadedFile(name,b.getvalue(),content_type='image/jpeg')
-@override_settings(SECURE_SSL_REDIRECT=False,SESSION_COOKIE_SECURE=False,CSRF_COOKIE_SECURE=False,STORAGES={'default':{'BACKEND':'django.core.files.storage.FileSystemStorage'},'staticfiles':{'BACKEND':'django.contrib.staticfiles.storage.StaticFilesStorage'}})
+@override_settings(NEW_UI_ENABLED=False,SECURE_SSL_REDIRECT=False,SESSION_COOKIE_SECURE=False,CSRF_COOKIE_SECURE=False,STORAGES={'default':{'BACKEND':'django.core.files.storage.FileSystemStorage'},'staticfiles':{'BACKEND':'django.contrib.staticfiles.storage.StaticFilesStorage'}})
 class IsolationTests(TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory();self.override=override_settings(MEDIA_ROOT=Path(self.temp.name));self.override.enable()

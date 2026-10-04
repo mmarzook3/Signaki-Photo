@@ -186,7 +186,8 @@ def photo_detail(request,pk):
    messages.error(request,'Please explain why this photo is not needed or what changes you need (up to 4,000 characters).')
   else:
    with transaction.atomic():
-    target.status=decision;target.save(update_fields=['status'])
+    target=Version.objects.select_for_update().get(pk=target.pk)
+    target.status=decision;target.review_revision+=1;target.save(update_fields=['status','review_revision'])
     Comment.objects.create(version=target,author=request.user,decision=decision,text=reason or 'Photo approved.',resolved=decision=='approved')
    messages.success(request,'Photo decision saved for version '+str(target.number)+'.')
   return redirect(str(request.path)+'?version='+str(target.pk)+('&view=grouped' if request.GET.get('view')=='grouped' else ''))

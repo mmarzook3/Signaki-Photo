@@ -24,3 +24,14 @@ def home(request):
         return redirect('/app/')
     from .views import home as legacy_home
     return legacy_home(request)
+
+def legacy_bridge(view, target):
+    """Old bookmarks open the new UI; POST handlers remain available for safe rollback."""
+    def wrapped(request, *args, **kwargs):
+        if settings.NEW_UI_ENABLED and request.method == 'GET':
+            from urllib.parse import urlencode
+            query = {key: request.GET[key] for key in ('view', 'version') if request.GET.get(key)}
+            url = target.format(**kwargs)
+            return redirect(url + ('?' + urlencode(query) if query else ''))
+        return view(request, *args, **kwargs)
+    return wrapped

@@ -1,8 +1,8 @@
-import type { StorybookConfig } from '@storybook/react-vite'
+import type { StorybookConfig } from "@storybook/react-vite";
 const config: StorybookConfig = {
   core: { disableTelemetry: true },
-  stories: ['../src/**/*.stories.@(ts|tsx)'],
-  addons: ['@storybook/addon-a11y'],
-  framework: '@storybook/react-vite',
-}
-export default config
+  stories: ["../src/**/*.stories.@(ts|tsx)"],
+  addons: ["@storybook/addon-a11y"],
+  framework: "@storybook/react-vite",
+};
+export default config;

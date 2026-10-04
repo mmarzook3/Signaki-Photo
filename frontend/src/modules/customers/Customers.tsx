@@ -1,17 +1,203 @@
-import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, UserRound, KeyRound, ShieldCheck, ShieldOff } from 'lucide-react'
-import { api, write, message } from '@/api/client'
-import type { User } from '@/api/types'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Empty, ErrorNotice, Loading, SaveButton } from '@/components/common'
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Plus,
+  UserRound,
+  KeyRound,
+  ShieldCheck,
+  ShieldOff,
+} from "lucide-react";
+import { api, write, message } from "@/api/client";
+import type { User } from "@/api/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Empty, ErrorNotice, Loading, SaveButton } from "@/components/common";
 export function Customers() {
-  const query = useQueryClient(); const [editor, setEditor] = useState<User | 'new' | null>(null); const [error, setError] = useState(''); const [busy, setBusy] = useState(false); const [search, setSearch] = useState('')
-  const result = useQuery({ queryKey: ['customers'], queryFn: () => api<User[]>('customers/') })
-  if (result.isPending) return <Loading />
-  if (result.error) return <ErrorNotice error={message(result.error)} />
-  const customers = result.data.filter(u => `${u.first_name} ${u.username}`.toLowerCase().includes(search.toLowerCase()))
-  return <><div className="page-heading"><div><p className="eyebrow">PEOPLE</p><h1>Customers</h1><p className="muted">Private access to the properties you share.</p></div><Button onClick={() => { setError(''); setEditor('new') }}><Plus size={16} />Add customer</Button></div><Input className="table-search" placeholder="Search customers…" aria-label="Search customers" value={search} onChange={e => setSearch(e.target.value)} />{error && !editor && <ErrorNotice error={error} />}<div className="customer-list">{customers.map(u => <article className="customer-row" key={u.id}><span className="avatar"><UserRound size={19} /></span><div><strong>{u.first_name || u.username}</strong><span>{u.username}</span></div><span className={`access-badge ${u.is_active ? '' : 'disabled'}`}>{u.is_active ? 'Active' : 'Disabled'}</span><Button variant="outline" disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await write(`customers/${u.id}/`, { is_active: !u.is_active }, 'PATCH'); await query.invalidateQueries({ queryKey: ['customers'] }) } catch (err) { setError(message(err)) } finally { setBusy(false) } }}>{u.is_active ? <ShieldOff size={15} /> : <ShieldCheck size={15} />}{u.is_active ? 'Disable access' : 'Enable access'}</Button><Button variant="outline" onClick={() => { setError(''); setEditor(u) }}><KeyRound size={15} />Reset password</Button></article>)}</div>{!customers.length && <Empty title="No customers found" text="Create a customer to start sharing a property." />}<Dialog open={Boolean(editor)} onOpenChange={open => { if (!open && !busy) setEditor(null) }}><DialogContent><DialogHeader><DialogTitle>{editor === 'new' ? 'Add customer' : 'Reset customer password'}</DialogTitle><DialogDescription>Share credentials privately. The customer must choose a new password at first login.</DialogDescription></DialogHeader><form className="form-stack" onSubmit={async e => { e.preventDefault(); if (!editor) return; setBusy(true); setError(''); const data = Object.fromEntries(new FormData(e.currentTarget)); try { await write(editor === 'new' ? 'customers/' : `customers/${editor.id}/`, data, editor === 'new' ? 'POST' : 'PATCH'); await query.invalidateQueries({ queryKey: ['customers'] }); setEditor(null) } catch (err) { setError(message(err)) } finally { setBusy(false) } }}>{error && <ErrorNotice error={error} />}{editor === 'new' && <><label>Username<Input name="username" autoComplete="off" required /></label><label>Display name<Input name="first_name" /></label></>}<label>Temporary password<Input name={editor === 'new' ? 'password1' : 'new_password1'} type="password" autoComplete="new-password" minLength={12} required /></label><label>Confirm password<Input name={editor === 'new' ? 'password2' : 'new_password2'} type="password" autoComplete="new-password" minLength={12} required /></label><p className="caption">Use at least 12 characters.</p><SaveButton busy={busy} /></form></DialogContent></Dialog></>
+  const query = useQueryClient();
+  const [editor, setEditor] = useState<User | "new" | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState("");
+  const result = useQuery({
+    queryKey: ["customers"],
+    queryFn: () => api<User[]>("customers/"),
+  });
+  if (result.isPending) return <Loading />;
+  if (result.error) return <ErrorNotice error={message(result.error)} />;
+  const customers = result.data.filter((u) =>
+    `${u.first_name} ${u.username}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
+  return (
+    <>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">PEOPLE</p>
+          <h1>Customers</h1>
+          <p className="muted">Private access to the properties you share.</p>
+        </div>
+        <Button
+          onClick={() => {
+            setError("");
+            setEditor("new");
+          }}
+        >
+          <Plus size={16} />
+          Add customer
+        </Button>
+      </div>
+      <Input
+        className="table-search"
+        placeholder="Search customers…"
+        aria-label="Search customers"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      {error && !editor && <ErrorNotice error={error} />}
+      <div className="customer-list">
+        {customers.map((u) => (
+          <article className="customer-row" key={u.id}>
+            <span className="avatar">
+              <UserRound size={19} />
+            </span>
+            <div>
+              <strong>{u.first_name || u.username}</strong>
+              <span>{u.username}</span>
+            </div>
+            <span className={`access-badge ${u.is_active ? "" : "disabled"}`}>
+              {u.is_active ? "Active" : "Disabled"}
+            </span>
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError("");
+                try {
+                  await write(
+                    `customers/${u.id}/`,
+                    { is_active: !u.is_active },
+                    "PATCH",
+                  );
+                  await query.invalidateQueries({ queryKey: ["customers"] });
+                } catch (err) {
+                  setError(message(err));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              {u.is_active ? (
+                <ShieldOff size={15} />
+              ) : (
+                <ShieldCheck size={15} />
+              )}
+              {u.is_active ? "Disable access" : "Enable access"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setError("");
+                setEditor(u);
+              }}
+            >
+              <KeyRound size={15} />
+              Reset password
+            </Button>
+          </article>
+        ))}
+      </div>
+      {!customers.length && (
+        <Empty
+          title="No customers found"
+          text="Create a customer to start sharing a property."
+        />
+      )}
+      <Dialog
+        open={Boolean(editor)}
+        onOpenChange={(open) => {
+          if (!open && !busy) setEditor(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editor === "new" ? "Add customer" : "Reset customer password"}
+            </DialogTitle>
+            <DialogDescription>
+              Share credentials privately. The customer must choose a new
+              password at first login.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            className="form-stack"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!editor) return;
+              setBusy(true);
+              setError("");
+              const data = Object.fromEntries(new FormData(e.currentTarget));
+              try {
+                await write(
+                  editor === "new" ? "customers/" : `customers/${editor.id}/`,
+                  data,
+                  editor === "new" ? "POST" : "PATCH",
+                );
+                await query.invalidateQueries({ queryKey: ["customers"] });
+                setEditor(null);
+              } catch (err) {
+                setError(message(err));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {error && <ErrorNotice error={error} />}
+            {editor === "new" && (
+              <>
+                <label>
+                  Username
+                  <Input name="username" autoComplete="off" required />
+                </label>
+                <label>
+                  Display name
+                  <Input name="first_name" />
+                </label>
+              </>
+            )}
+            <label>
+              Temporary password
+              <Input
+                name={editor === "new" ? "password1" : "new_password1"}
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                required
+              />
+            </label>
+            <label>
+              Confirm password
+              <Input
+                name={editor === "new" ? "password2" : "new_password2"}
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                required
+              />
+            </label>
+            <p className="caption">Use at least 12 characters.</p>
+            <SaveButton busy={busy} />
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

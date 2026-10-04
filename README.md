@@ -1,67 +1,81 @@
 # Signaki Photos
 
-Private property-photo reviews at **https://photo.signaki.com**. This domain was
-confirmed by the owner; the originally supplied photo.scanaki.com was a domain mix-up.
+A private property-photography review workspace with a modular React/TypeScript
+frontend and Django API. The application is self-hostable and uses open-source
+libraries. Reference-product assets and customer data are not included.
 
-## Using the platform
+## Current scope
 
-1. Sign in as administrator and change the temporary password at first login.
-2. In **Customers**, create a username and temporary password. Share them privately.
-   Customers must choose a new password at first login.
-3. **Add property**, enter its name/address, and assign the customer.
-4. Open the property, expand **Add photographs**, create room groups and upload up
-   to ten JPEG/PNG/WebP files at a time. Select their group during upload.
-5. Customers switch between **All photos** and **By room / group**.
-6. Select a photo to comment. Every comment records the exact version. The latest
-   photo opens by default; the version selector preserves earlier images.
-7. Administrators use **Feedback** across properties, open the referenced version,
-   upload a replacement, reply and mark comments resolved.
-8. Photo settings change group, order and visibility. Property settings archive or
-   reassign properties. Customer access can be disabled and passwords reset.
+- Customer accounts and assigned properties; staff administration.
+- Watermarked galleries, room groups, filename/status filters and review progress.
+- Immersive viewer, zoom/pan, previous/next, keyboard navigation and comparison.
+- Immutable photo versions, version-specific comments and customer decisions.
+- Mandatory reasons for Reject and Review; approval is separate from resolution.
+- Upload/replacement, hidden photos, archived properties and customer access controls.
+- Admin-controlled Google Drive delivery link on property cards and property pages.
 
-## Image protection and limits
+The later P7 features (annotations, threaded/private comments, Kanban, integrations,
+notifications and paid checkout) are intentionally not included in this release.
 
-Only 1280px review JPEGs and 480px thumbnails, quality 72, are stored. Source uploads
-are discarded; source EXIF is stripped. Repeated watermarks plus photo name/version
-are baked into both image sizes, not removable HTML overlays. Every image request
-checks customer/property access; there is no public media folder or open registration.
+## Development
 
-Screenshots and saving displayed watermarked proofs cannot be prevented. Watermarks
-are a deterrent, not DRM. Keep full-quality originals in your separate photography
-storage and deliver them outside this app after payment.
+Use Python 3.12 and Node 24.15. Set a private `DJANGO_SECRET_KEY`, an isolated
+`DATA_DIR`, `COOKIE_SECURE=0`, `SSL_REDIRECT=0` and `NEW_UI_ENABLED=1` for local tests.
+Never point development commands at production data.
 
-Maximum 25 MB / 40 megapixels per input, ten files per upload, 64 MB request limit.
-JPEG, PNG and static WebP only. Videos, RAWs and unwatermarked master downloads are
-not supported. Existing versions keep their embedded names if a photo is renamed;
-new versions use the new name. Comments retain their original version association.
-No email, payment, external integration or automatic messaging is enabled.
-
-## Implementation and local testing
-
-Django 5.2 LTS, Gunicorn, Pillow, WhiteNoise, SQLite WAL and server-rendered templates.
-Small progressive-enhancement JavaScript; no front-end build or external font/CDN.
-Password hashing, CSRF protection, secure HttpOnly cookies, login throttling, CSP
-and property-level authorisation are enabled. Migrations are committed; versions
-create immutable proof files instead of overwriting prior images.
-
-On the main PC use Python only, never Docker. Create `.venv`, install
-`requirements.txt`, set a local-only `DJANGO_SECRET_KEY`, `COOKIE_SECURE=0` and
-`SSL_REDIRECT=0`, then run:
-
-```powershell
-.venv\Scripts\python.exe manage.py migrate
-.venv\Scripts\python.exe manage.py collectstatic --noinput
-.venv\Scripts\python.exe manage.py test proofs
-.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+```text
+python -m venv .venv
+python -m pip install -r requirements.txt
+cd frontend
+npm ci
+npm run build
+cd ..
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py runserver 127.0.0.1:8000
 ```
 
-Production Docker operations run remotely on HASHIK only. See [deployment](DEPLOYMENT.md)
-and [test evidence](TESTING.md).
+Open `/app/`. Frontend assets are served by Django/WhiteNoise at the same origin;
+no separate Node runtime is needed in production. `/` redirects to the new UI when
+`NEW_UI_ENABLED=1`. Legacy bookmarks bridge to corresponding new screens.
 
+## Checks
 
-Gallery update: photo pages offer Previous/Next and a position counter. Grouped navigation stays within the selected room; All photos follows property order. Hidden photos remain excluded for customers. Room groups use accessible native disclosure controls and start collapsed. Navigation boundaries and grouping are covered by regression tests.
+```text
+python manage.py test proofs
+python manage.py spectacular --file frontend/openapi.yaml --fail-on-warn
+cd frontend
+npx openapi-typescript openapi.yaml -o src/api/generated.ts
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run build-storybook
+npm run test:e2e
+```
 
-Customer decisions are version-specific: Approve needs no comment; Reject (not needed) and Review (changes needed) require a reason. Decisions remain in feedback history, and new versions await review. Admins add an HTTPS Google Drive URL in Property settings and enable Share delivery link with customer when delivery is ready. The link then appears on the property card and gallery. Drive sharing permissions must allow the customer access.
+Browser tests require `SIGNAKI_TEST_URL` and `SIGNAKI_QA_FILE` pointing to isolated
+QA credentials and fixture IDs. Do not use production credentials in browser tests.
+The fixture file has username, password, property, photo and optional upload path.
+It stays outside Git. Tests use the installed Chrome browser in an isolated context.
 
+## Architecture and operations
 
-2026-10-04 workspace redesign: compact sidebar, responsive gallery, filename search, latest-version status filters, review progress and compact grid. The viewer adds a nearby-photo filmstrip, left/right keyboard navigation (disabled while typing), full screen where supported, and comparison against another version. Existing authentication, version-specific decisions/comments, grouping, uploads and delivery controls are retained. Browser checks on an isolated 12-photo fixture passed at 1440px and 390px: filtering, disclosures, comparison, mandatory reason, decision persistence, navigation and overflow. No customer feedback was changed for tests. This is an original Signaki interface informed by public Picflow references; it does not claim the full Picflow product or integrations.
+See [architecture](docs/ARCHITECTURE.md), [operations](docs/OPERATIONS.md) and
+[third-party notices](THIRD_PARTY_NOTICES.md). The public repository deliberately
+excludes private host/key configuration, databases, photographs, credentials,
+reference captures and test artifacts.
+
+For this deployment, Docker runs only on the authorised spare laptop. Never run or
+inspect Docker on the administration PC. Source bundles include tracked files only.
+
+## Review-image protection
+
+Uploads become 1280px review JPEGs and 480px thumbnails. Repeated watermarks and
+filename/version labels are rasterised; source metadata is removed and originals
+are discarded. Each proof request checks access. Screenshots cannot be prevented.
+Keep full-quality originals separately and release the delivery link deliberately.
+
+Input limits: JPEG/PNG/static WebP, 25 MB and 40 megapixels per image, ten files and
+64 MB per request. Videos/RAW hosting are not supported. Drive sharing permissions
+remain managed in Drive; hiding a portal link does not revoke Drive access.

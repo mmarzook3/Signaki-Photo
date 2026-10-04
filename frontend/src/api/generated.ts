@@ -4,970 +4,1071 @@
  */
 
 export interface paths {
-    "/api/schema/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description OpenApi3 schema for this API. Format can be selected via content negotiation.
-         *
-         *     - YAML: application/vnd.oai.openapi
-         *     - JSON: application/vnd.oai.openapi+json
-         */
-        get: operations["schema_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  "/api/schema/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/comments/{id}/resolve/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_comments_resolve_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * @description OpenApi3 schema for this API. Format can be selected via content negotiation.
+     *
+     *     - YAML: application/vnd.oai.openapi
+     *     - JSON: application/vnd.oai.openapi+json
+     */
+    get: operations["schema_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/comments/{id}/resolve/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/customers/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_customers_list"];
-        put?: never;
-        post: operations["v1_customers_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["v1_comments_resolve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/customers/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/customers/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["v1_customers_partial_update"];
-        trace?: never;
+    get: operations["v1_customers_list"];
+    put?: never;
+    post: operations["v1_customers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/customers/{id}/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/feedback/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_feedback_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["v1_customers_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/feedback/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/password/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_password_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["v1_feedback_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/password/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/photos/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_photos_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["v1_photos_partial_update"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["v1_password_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/photos/{id}/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/photos/{id}/versions/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_photos_versions_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["v1_photos_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["v1_photos_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/photos/{id}/versions/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/properties/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_properties_list"];
-        put?: never;
-        post: operations["v1_properties_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["v1_photos_versions_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/properties/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/properties/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_properties_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["v1_properties_partial_update"];
-        trace?: never;
+    get: operations["v1_properties_list"];
+    put?: never;
+    post: operations["v1_properties_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/properties/{id}/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/properties/{id}/groups/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_properties_groups_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["v1_properties_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["v1_properties_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/properties/{id}/groups/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/properties/{id}/upload/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_properties_upload_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["v1_properties_groups_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/properties/{id}/upload/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/session/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_session_retrieve"];
-        put?: never;
-        post: operations["v1_session_create"];
-        delete: operations["v1_session_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["v1_properties_upload_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/session/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/versions/{id}/comments/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_versions_comments_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations["v1_session_retrieve"];
+    put?: never;
+    post: operations["v1_session_create"];
+    delete: operations["v1_session_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/versions/{id}/comments/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/versions/{id}/decision/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_versions_decision_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations["v1_versions_comments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/versions/{id}/decision/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    post: operations["v1_versions_decision_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @enum {unknown} */
-        BlankEnum: "";
-        Comment: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: uuid */
-            readonly version_id: string;
-            readonly version_number: number;
-            /** Format: uuid */
-            readonly photo_id: string;
-            readonly photo_name: string;
-            readonly property_name: string;
-            readonly author: components["schemas"]["User"];
-            text: string;
-            decision?: components["schemas"]["CommentDecisionEnum"] | components["schemas"]["BlankEnum"];
-            resolved?: boolean;
-            /** Format: date-time */
-            readonly created: string;
-        };
-        /**
-         * @description * `approved` - Approved
-         *     * `rejected` - Rejected — not needed
-         *     * `review` - Review — changes needed
-         * @enum {string}
-         */
-        CommentDecisionEnum: "approved" | "rejected" | "review";
-        CommentInput: {
-            text: string;
-            /** Format: uuid */
-            request_id: string;
-        };
-        CustomerInput: {
-            username: string;
-            first_name?: string;
-            password1: string;
-            password2: string;
-        };
-        DecisionInput: {
-            decision: components["schemas"]["DecisionInputDecisionEnum"];
-            /** @default  */
-            text: string;
-            expected_revision: number;
-            /** Format: uuid */
-            request_id: string;
-        };
-        /**
-         * @description * `approved` - approved
-         *     * `rejected` - rejected
-         *     * `review` - review
-         * @enum {string}
-         */
-        DecisionInputDecisionEnum: "approved" | "rejected" | "review";
-        FeedbackResponse: {
-            items: components["schemas"]["Comment"][];
-            page: number;
-            pages: number;
-            count: number;
-        };
-        GalleryResponse: {
-            property: components["schemas"]["Property"];
-            groups: components["schemas"]["Group"][];
-            photos: components["schemas"]["Photo"][];
-        };
-        Group: {
-            readonly id: number;
-            name: string;
-            /** Format: int64 */
-            position?: number;
-        };
-        LoginInput: {
-            username: string;
-            password: string;
-        };
-        PasswordInput: {
-            old_password: string;
-            new_password1: string;
-            new_password2: string;
-        };
-        PatchedCustomerUpdateInput: {
-            is_active?: boolean;
-            new_password1?: string;
-            new_password2?: string;
-        };
-        PatchedPhotoInput: {
-            name?: string;
-            group?: number | null;
-            position?: number;
-            hidden?: boolean;
-        };
-        PatchedPropertyInput: {
-            name?: string;
-            address?: string;
-            customer?: number;
-            archived?: boolean;
-            delivery_url?: string;
-            delivery_shared?: boolean;
-        };
-        Photo: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: uuid */
-            readonly property_id: string;
-            name: string;
-            readonly group_id: number | null;
-            /** Format: int64 */
-            position?: number;
-            hidden?: boolean;
-            readonly latest: components["schemas"]["Version"] | null;
-            readonly versions: components["schemas"]["Version"][];
-        };
-        PhotoResponse: {
-            photo: components["schemas"]["Photo"];
-            comments: components["schemas"]["Comment"][];
-        };
-        Property: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            address?: string;
-            readonly customer: components["schemas"]["User"];
-            archived?: boolean;
-            readonly delivery_url: string;
-            delivery_shared?: boolean;
-            readonly cover: components["schemas"]["Version"] | null;
-            readonly photo_count: number;
-            readonly reviewed_count: number;
-        };
-        PropertyInput: {
-            name: string;
-            address?: string;
-            customer: number;
-            archived?: boolean;
-            delivery_url?: string;
-            delivery_shared?: boolean;
-        };
-        ReplacementInput: {
-            /** Format: uuid */
-            request_id: string;
-            /** Format: uri */
-            photo: string;
-            note?: string;
-        };
-        ResolveInput: {
-            resolved: boolean;
-        };
-        SessionResponse: {
-            user: components["schemas"]["User"] | null;
-            csrf: string;
-            must_change_password: boolean;
-            version: string;
-        };
-        /**
-         * @description * `pending` - Awaiting review
-         *     * `approved` - Approved
-         *     * `rejected` - Rejected — not needed
-         *     * `review` - Review — changes needed
-         * @enum {string}
-         */
-        StatusEnum: "pending" | "approved" | "rejected" | "review";
-        UploadInput: {
-            group?: number | null;
-            photos: string[];
-        };
-        User: {
-            readonly id: number;
-            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
-            username: string;
-            first_name?: string;
-            /**
-             * Staff status
-             * @description Designates whether the user can log into this admin site.
-             */
-            is_staff?: boolean;
-            /**
-             * Active
-             * @description Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
-             */
-            is_active?: boolean;
-        };
-        Version: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: int64 */
-            number: number;
-            label: string;
-            note?: string;
-            status?: components["schemas"]["StatusEnum"];
-            /** Format: date-time */
-            readonly created: string;
-            /** Format: int64 */
-            review_revision?: number;
-            readonly image_url: string;
-            readonly thumb_url: string;
-        };
+  schemas: {
+    /** @enum {unknown} */
+    BlankEnum: "";
+    Comment: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly version_id: string;
+      readonly version_number: number;
+      /** Format: uuid */
+      readonly photo_id: string;
+      readonly photo_name: string;
+      readonly property_name: string;
+      readonly author: components["schemas"]["User"];
+      text: string;
+      decision?:
+        | components["schemas"]["CommentDecisionEnum"]
+        | components["schemas"]["BlankEnum"];
+      resolved?: boolean;
+      /** Format: date-time */
+      readonly created: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /**
+     * @description * `approved` - Approved
+     *     * `rejected` - Rejected — not needed
+     *     * `review` - Review — changes needed
+     * @enum {string}
+     */
+    CommentDecisionEnum: "approved" | "rejected" | "review";
+    CommentInput: {
+      text: string;
+      /** Format: uuid */
+      request_id: string;
+    };
+    CustomerInput: {
+      username: string;
+      first_name?: string;
+      password1: string;
+      password2: string;
+    };
+    DecisionInput: {
+      decision: components["schemas"]["DecisionInputDecisionEnum"];
+      /** @default  */
+      text: string;
+      expected_revision: number;
+      /** Format: uuid */
+      request_id: string;
+    };
+    /**
+     * @description * `approved` - approved
+     *     * `rejected` - rejected
+     *     * `review` - review
+     * @enum {string}
+     */
+    DecisionInputDecisionEnum: "approved" | "rejected" | "review";
+    FeedbackResponse: {
+      items: components["schemas"]["Comment"][];
+      page: number;
+      pages: number;
+      count: number;
+    };
+    GalleryResponse: {
+      property: components["schemas"]["Property"];
+      groups: components["schemas"]["Group"][];
+      photos: components["schemas"]["Photo"][];
+    };
+    Group: {
+      readonly id: number;
+      name: string;
+      /** Format: int64 */
+      position?: number;
+    };
+    LoginInput: {
+      username: string;
+      password: string;
+    };
+    PasswordInput: {
+      old_password: string;
+      new_password1: string;
+      new_password2: string;
+    };
+    PatchedCustomerUpdateInput: {
+      is_active?: boolean;
+      new_password1?: string;
+      new_password2?: string;
+    };
+    PatchedPhotoInput: {
+      name?: string;
+      group?: number | null;
+      position?: number;
+      hidden?: boolean;
+    };
+    PatchedPropertyInput: {
+      name?: string;
+      address?: string;
+      customer?: number;
+      archived?: boolean;
+      delivery_url?: string;
+      delivery_shared?: boolean;
+    };
+    Photo: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly property_id: string;
+      name: string;
+      readonly group_id: number | null;
+      /** Format: int64 */
+      position?: number;
+      hidden?: boolean;
+      readonly latest: components["schemas"]["Version"] | null;
+      readonly versions: components["schemas"]["Version"][];
+    };
+    PhotoResponse: {
+      photo: components["schemas"]["Photo"];
+      comments: components["schemas"]["Comment"][];
+    };
+    Property: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      address?: string;
+      readonly customer: components["schemas"]["User"];
+      archived?: boolean;
+      readonly delivery_url: string;
+      delivery_shared?: boolean;
+      readonly cover: components["schemas"]["Version"] | null;
+      readonly photo_count: number;
+      readonly reviewed_count: number;
+    };
+    PropertyInput: {
+      name: string;
+      address?: string;
+      customer: number;
+      archived?: boolean;
+      delivery_url?: string;
+      delivery_shared?: boolean;
+    };
+    ReplacementInput: {
+      /** Format: uuid */
+      request_id: string;
+      /** Format: uri */
+      photo: string;
+      note?: string;
+    };
+    ResolveInput: {
+      resolved: boolean;
+    };
+    SessionResponse: {
+      user: components["schemas"]["User"] | null;
+      csrf: string;
+      must_change_password: boolean;
+      version: string;
+    };
+    /**
+     * @description * `pending` - Awaiting review
+     *     * `approved` - Approved
+     *     * `rejected` - Rejected — not needed
+     *     * `review` - Review — changes needed
+     * @enum {string}
+     */
+    StatusEnum: "pending" | "approved" | "rejected" | "review";
+    UploadInput: {
+      group?: number | null;
+      photos: string[];
+    };
+    User: {
+      readonly id: number;
+      /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
+      username: string;
+      first_name?: string;
+      /**
+       * Staff status
+       * @description Designates whether the user can log into this admin site.
+       */
+      is_staff?: boolean;
+      /**
+       * Active
+       * @description Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+       */
+      is_active?: boolean;
+    };
+    Version: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: int64 */
+      number: number;
+      label: string;
+      note?: string;
+      status?: components["schemas"]["StatusEnum"];
+      /** Format: date-time */
+      readonly created: string;
+      /** Format: int64 */
+      review_revision?: number;
+      readonly image_url: string;
+      readonly thumb_url: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    schema_retrieve: {
-        parameters: {
-            query?: {
-                format?: "json" | "yaml";
-                lang?: "af" | "ar" | "ar-dz" | "ast" | "az" | "be" | "bg" | "bn" | "br" | "bs" | "ca" | "ckb" | "cs" | "cy" | "da" | "de" | "dsb" | "el" | "en" | "en-au" | "en-gb" | "eo" | "es" | "es-ar" | "es-co" | "es-mx" | "es-ni" | "es-ve" | "et" | "eu" | "fa" | "fi" | "fr" | "fy" | "ga" | "gd" | "gl" | "he" | "hi" | "hr" | "hsb" | "hu" | "hy" | "ia" | "id" | "ig" | "io" | "is" | "it" | "ja" | "ka" | "kab" | "kk" | "km" | "kn" | "ko" | "ky" | "lb" | "lt" | "lv" | "mk" | "ml" | "mn" | "mr" | "ms" | "my" | "nb" | "ne" | "nl" | "nn" | "os" | "pa" | "pl" | "pt" | "pt-br" | "ro" | "ru" | "sk" | "sl" | "sq" | "sr" | "sr-latn" | "sv" | "sw" | "ta" | "te" | "tg" | "th" | "tk" | "tr" | "tt" | "udm" | "ug" | "uk" | "ur" | "uz" | "vi" | "zh-hans" | "zh-hant";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.oai.openapi": {
-                        [key: string]: unknown;
-                    };
-                    "application/yaml": {
-                        [key: string]: unknown;
-                    };
-                    "application/vnd.oai.openapi+json": {
-                        [key: string]: unknown;
-                    };
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
+  schema_retrieve: {
+    parameters: {
+      query?: {
+        format?: "json" | "yaml";
+        lang?:
+          | "af"
+          | "ar"
+          | "ar-dz"
+          | "ast"
+          | "az"
+          | "be"
+          | "bg"
+          | "bn"
+          | "br"
+          | "bs"
+          | "ca"
+          | "ckb"
+          | "cs"
+          | "cy"
+          | "da"
+          | "de"
+          | "dsb"
+          | "el"
+          | "en"
+          | "en-au"
+          | "en-gb"
+          | "eo"
+          | "es"
+          | "es-ar"
+          | "es-co"
+          | "es-mx"
+          | "es-ni"
+          | "es-ve"
+          | "et"
+          | "eu"
+          | "fa"
+          | "fi"
+          | "fr"
+          | "fy"
+          | "ga"
+          | "gd"
+          | "gl"
+          | "he"
+          | "hi"
+          | "hr"
+          | "hsb"
+          | "hu"
+          | "hy"
+          | "ia"
+          | "id"
+          | "ig"
+          | "io"
+          | "is"
+          | "it"
+          | "ja"
+          | "ka"
+          | "kab"
+          | "kk"
+          | "km"
+          | "kn"
+          | "ko"
+          | "ky"
+          | "lb"
+          | "lt"
+          | "lv"
+          | "mk"
+          | "ml"
+          | "mn"
+          | "mr"
+          | "ms"
+          | "my"
+          | "nb"
+          | "ne"
+          | "nl"
+          | "nn"
+          | "os"
+          | "pa"
+          | "pl"
+          | "pt"
+          | "pt-br"
+          | "ro"
+          | "ru"
+          | "sk"
+          | "sl"
+          | "sq"
+          | "sr"
+          | "sr-latn"
+          | "sv"
+          | "sw"
+          | "ta"
+          | "te"
+          | "tg"
+          | "th"
+          | "tk"
+          | "tr"
+          | "tt"
+          | "udm"
+          | "ug"
+          | "uk"
+          | "ur"
+          | "uz"
+          | "vi"
+          | "zh-hans"
+          | "zh-hant";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    v1_comments_resolve_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResolveInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["ResolveInput"];
-                "multipart/form-data": components["schemas"]["ResolveInput"];
-            };
+        content: {
+          "application/vnd.oai.openapi": {
+            [key: string]: unknown;
+          };
+          "application/yaml": {
+            [key: string]: unknown;
+          };
+          "application/vnd.oai.openapi+json": {
+            [key: string]: unknown;
+          };
+          "application/json": {
+            [key: string]: unknown;
+          };
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
+      };
     };
-    v1_customers_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"][];
-                };
-            };
-        };
+  };
+  v1_comments_resolve_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    v1_customers_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomerInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["CustomerInput"];
-                "multipart/form-data": components["schemas"]["CustomerInput"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResolveInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["ResolveInput"];
+        "multipart/form-data": components["schemas"]["ResolveInput"];
+      };
     };
-    v1_customers_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedCustomerUpdateInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedCustomerUpdateInput"];
-                "multipart/form-data": components["schemas"]["PatchedCustomerUpdateInput"];
-            };
+        content: {
+          "application/json": Record<string, never>;
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-        };
+      };
     };
-    v1_feedback_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FeedbackResponse"];
-                };
-            };
-        };
+  };
+  v1_customers_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    v1_password_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PasswordInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["PasswordInput"];
-                "multipart/form-data": components["schemas"]["PasswordInput"];
-            };
+        content: {
+          "application/json": components["schemas"]["User"][];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
+      };
     };
-    v1_photos_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhotoResponse"];
-                };
-            };
-        };
+  };
+  v1_customers_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    v1_photos_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedPhotoInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedPhotoInput"];
-                "multipart/form-data": components["schemas"]["PatchedPhotoInput"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CustomerInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["CustomerInput"];
+        "multipart/form-data": components["schemas"]["CustomerInput"];
+      };
     };
-    v1_photos_versions_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReplacementInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["ReplacementInput"];
-                "multipart/form-data": components["schemas"]["ReplacementInput"];
-            };
+        content: {
+          "application/json": components["schemas"]["User"];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Version"];
-                };
-            };
-        };
+      };
     };
-    v1_properties_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Property"][];
-                };
-            };
-        };
+  };
+  v1_customers_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
     };
-    v1_properties_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PropertyInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["PropertyInput"];
-                "multipart/form-data": components["schemas"]["PropertyInput"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PropertyInput"];
-                };
-            };
-        };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCustomerUpdateInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCustomerUpdateInput"];
+        "multipart/form-data": components["schemas"]["PatchedCustomerUpdateInput"];
+      };
     };
-    v1_properties_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GalleryResponse"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["User"];
         };
+      };
     };
-    v1_properties_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedPropertyInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedPropertyInput"];
-                "multipart/form-data": components["schemas"]["PatchedPropertyInput"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
+  };
+  v1_feedback_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    v1_properties_groups_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Group"];
-                "application/x-www-form-urlencoded": components["schemas"]["Group"];
-                "multipart/form-data": components["schemas"]["Group"];
-            };
+        content: {
+          "application/json": components["schemas"]["FeedbackResponse"];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Group"];
-                };
-            };
-        };
+      };
     };
-    v1_properties_upload_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UploadInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["UploadInput"];
-                "multipart/form-data": components["schemas"]["UploadInput"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
+  };
+  v1_password_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    v1_session_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasswordInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasswordInput"];
+        "multipart/form-data": components["schemas"]["PasswordInput"];
+      };
     };
-    v1_session_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["LoginInput"];
-                "multipart/form-data": components["schemas"]["LoginInput"];
-            };
+        content: {
+          "application/json": Record<string, never>;
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionResponse"];
-                };
-            };
-        };
+      };
     };
-    v1_session_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
+  };
+  v1_photos_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    v1_versions_comments_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CommentInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["CommentInput"];
-                "multipart/form-data": components["schemas"]["CommentInput"];
-            };
+        content: {
+          "application/json": components["schemas"]["PhotoResponse"];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Comment"];
-                };
-            };
-        };
+      };
     };
-    v1_versions_decision_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DecisionInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["DecisionInput"];
-                "multipart/form-data": components["schemas"]["DecisionInput"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Version"];
-                };
-            };
-        };
+  };
+  v1_photos_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPhotoInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPhotoInput"];
+        "multipart/form-data": components["schemas"]["PatchedPhotoInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+    };
+  };
+  v1_photos_versions_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplacementInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReplacementInput"];
+        "multipart/form-data": components["schemas"]["ReplacementInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Version"];
+        };
+      };
+    };
+  };
+  v1_properties_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Property"][];
+        };
+      };
+    };
+  };
+  v1_properties_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PropertyInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["PropertyInput"];
+        "multipart/form-data": components["schemas"]["PropertyInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PropertyInput"];
+        };
+      };
+    };
+  };
+  v1_properties_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GalleryResponse"];
+        };
+      };
+    };
+  };
+  v1_properties_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPropertyInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPropertyInput"];
+        "multipart/form-data": components["schemas"]["PatchedPropertyInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+    };
+  };
+  v1_properties_groups_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Group"];
+        "application/x-www-form-urlencoded": components["schemas"]["Group"];
+        "multipart/form-data": components["schemas"]["Group"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Group"];
+        };
+      };
+    };
+  };
+  v1_properties_upload_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UploadInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["UploadInput"];
+        "multipart/form-data": components["schemas"]["UploadInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+    };
+  };
+  v1_session_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionResponse"];
+        };
+      };
+    };
+  };
+  v1_session_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoginInput"];
+        "multipart/form-data": components["schemas"]["LoginInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionResponse"];
+        };
+      };
+    };
+  };
+  v1_session_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+    };
+  };
+  v1_versions_comments_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CommentInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["CommentInput"];
+        "multipart/form-data": components["schemas"]["CommentInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Comment"];
+        };
+      };
+    };
+  };
+  v1_versions_decision_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DecisionInput"];
+        "application/x-www-form-urlencoded": components["schemas"]["DecisionInput"];
+        "multipart/form-data": components["schemas"]["DecisionInput"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Version"];
+        };
+      };
+    };
+  };
 }

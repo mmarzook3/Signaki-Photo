@@ -90,3 +90,16 @@ class ApiTests(TestCase):
     def test_staff_cannot_impersonate_customer_decision(self):
         self.client.force_login(self.admin)
         self.assertEqual(self.post(f'versions/{self.version.pk}/decision/', {}).status_code, 403)
+
+    @override_settings(NEW_UI_ENABLED=True)
+    def test_existing_bookmarks_bridge_without_losing_version(self):
+        self.assertRedirects(self.client.get('/'), '/app/', fetch_redirect_response=False)
+        response = self.client.get(f'/photos/{self.photo.pk}/?version={self.version.pk}')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f'/app/photos/{self.photo.pk}?version={self.version.pk}', response['Location'])
+
+    def test_legacy_decision_advances_api_conflict_counter(self):
+        self.client.post(f'/photos/{self.photo.pk}/', {'version': self.version.pk, 'decision': 'review', 'text': 'Legacy tab correction'})
+        self.version.refresh_from_db()
+        self.assertEqual(self.version.review_revision, 1)
+        self.assertEqual(self.post(f'versions/{self.version.pk}/decision/', {'decision': 'approved', 'expected_revision': 0, 'request_id': str(uuid.uuid4())}).status_code, 409)
