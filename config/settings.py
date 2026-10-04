@@ -4,7 +4,7 @@ BASE_DIR=Path(__file__).resolve().parent.parent
 SECRET_KEY=os.environ['DJANGO_SECRET_KEY']
 DEBUG=False
 ALLOWED_HOSTS=os.environ.get('ALLOWED_HOSTS','photo.signaki.com,localhost,127.0.0.1,testserver').split(',')
-INSTALLED_APPS=['django.contrib.auth','django.contrib.contenttypes','django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles','proofs']
+INSTALLED_APPS=['django.contrib.auth','django.contrib.contenttypes','django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles','proofs','rest_framework','drf_spectacular']
 MIDDLEWARE=['django.middleware.security.SecurityMiddleware','whitenoise.middleware.WhiteNoiseMiddleware','django.contrib.sessions.middleware.SessionMiddleware','django.middleware.common.CommonMiddleware','django.middleware.csrf.CsrfViewMiddleware','django.contrib.auth.middleware.AuthenticationMiddleware','proofs.middleware.AccessHeaders','django.contrib.messages.middleware.MessageMiddleware','django.middleware.clickjacking.XFrameOptionsMiddleware']
 ROOT_URLCONF='config.urls'
 TEMPLATES=[{'BACKEND':'django.template.backends.django.DjangoTemplates','DIRS':[BASE_DIR/'templates'],'APP_DIRS':True,'OPTIONS':{'context_processors':['django.template.context_processors.request','django.contrib.auth.context_processors.auth','django.contrib.messages.context_processors.messages']}}]
@@ -31,3 +31,7 @@ CSRF_TRUSTED_ORIGINS=['https://'+os.environ.get('APP_DOMAIN','photo.signaki.com'
 FILE_UPLOAD_MAX_MEMORY_SIZE=2*1024*1024;DATA_UPLOAD_MAX_MEMORY_SIZE=64*1024*1024;DATA_UPLOAD_MAX_NUMBER_FILES=10
 EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend'
 APP_VERSION=os.environ.get('APP_VERSION','development')
+
+REST_FRAMEWORK = {"DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"], "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"], "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
+SPECTACULAR_SETTINGS = {"TITLE": "Signaki API", "VERSION": "1.0.0", "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"]}
+NEW_UI_ENABLED = os.environ.get("NEW_UI_ENABLED", "0") == "1"
