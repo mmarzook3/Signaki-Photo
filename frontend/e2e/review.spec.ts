@@ -16,10 +16,14 @@ const runtimeErrors = new WeakMap<object, string[]>();
 test.beforeEach(async ({ page }) => {
   const errors: string[] = [];
   runtimeErrors.set(page, errors);
-  page.on("pageerror", error => errors.push(error.message));
-  page.on("console", event => { if (event.type() === "error") errors.push(event.text()); });
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (event) => {
+    if (event.type() === "error") errors.push(event.text());
+  });
 });
-test.afterEach(async ({ page }) => { expect(runtimeErrors.get(page)).toEqual([]); });
+test.afterEach(async ({ page }) => {
+  expect(runtimeErrors.get(page)).toEqual([]);
+});
 async function signIn(page: import("@playwright/test").Page, admin = false) {
   await page.goto("/app/");
   await page
@@ -44,11 +48,15 @@ test("customer review journey preserves room, version and draft state", async ({
     .click();
   await page.locator(".photo-card").first().click();
   await expect(page.locator(".viewer-position")).toHaveText(/1 \/ /);
-  await page.getByRole("button",{name:"Show feedback",exact:true}).click();
-  await page.getByRole("button",{name:"Viewer options"}).click();
-  await page.getByRole("menuitem", { name: "Compare versions", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Show feedback", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Viewer options" }).click();
+  await page
+    .getByRole("menuitem", { name: "Compare versions", exact: true })
+    .click();
   await expect(page.locator(".image-stage")).toHaveCount(2);
-  await page.getByRole("button",{name:"Viewer options"}).click();
+  await page.getByRole("button", { name: "Viewer options" }).click();
   await page.getByRole("menuitem", { name: "Close comparison" }).click();
   await page.getByLabel(/Comment on version/).fill(draft);
   await page.getByRole("button", { name: "Next photograph" }).click();
@@ -90,7 +98,9 @@ test("mobile gallery and viewer remain usable without page overflow", async ({
   await page.goto(`/app/properties/${qa.property}`);
   await page.locator(".photo-card").first().click();
   await expect(page.locator(".image-stage img")).toBeVisible();
-  await page.getByRole("button",{name:"Show feedback",exact:true}).click();
+  await page
+    .getByRole("button", { name: "Show feedback", exact: true })
+    .click();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -126,7 +136,9 @@ test("admin can manage delivery, upload, replace and resolve feedback", async ({
     page.getByRole("link", { name: "High-quality photos" }),
   ).toBeVisible();
   await page.locator(".photo-card").first().click();
-  await page.getByRole("button",{name:"Show feedback",exact:true}).click();
+  await page
+    .getByRole("button", { name: "Show feedback", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Photo settings", exact: true })
     .click();
@@ -207,9 +219,7 @@ test("admin provisions customer, property and room; customer changes temporary p
   await page
     .getByRole("button", { name: "Upload photographs", exact: true })
     .click();
-  await expect(
-    page.getByText(/: Uploaded$/),
-  ).toBeVisible();
+  await expect(page.getByText(/: Uploaded$/)).toBeVisible();
   await expect(page.locator(".upload-success svg")).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect(page.locator(".photo-card")).toHaveCount(1);

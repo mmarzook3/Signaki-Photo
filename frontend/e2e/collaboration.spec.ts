@@ -23,34 +23,164 @@ test.beforeEach(({ page }) => {
 });
 test.afterEach(({ page }) => expect(errors.get(page)).toEqual([]));
 test.describe.configure({ mode: "serial" });
-test("all drawing tools retain normalized coordinates when zoomed",async({page})=>{
- await login(page);await page.goto(`/app/properties/${qa.property}`);await page.locator('.photo-card').nth(1).click();
- await page.getByRole('button',{name:'Zoom in',exact:true}).click();await page.getByRole('button',{name:'Draw',exact:true}).click();
- let count=0;for(const tool of ['Pin','Brush','Rectangle','Ellipse','Arrow']){
-  await page.getByRole('button',{name:tool,exact:true}).click();const box=(await page.locator('.annotation-layer.is-drawing').boundingBox())!;
-  await page.mouse.move(box.x+box.width*.4,box.y+box.height*.4);await page.mouse.down();await page.mouse.move(box.x+box.width*.6,box.y+box.height*.6,{steps:5});await page.mouse.up();count++;
-  await expect(page.locator('.anchor-footer')).toContainText(`${count} mark`);
- }
- await page.getByRole('button',{name:'Undo drawing',exact:true}).click();await page.getByRole('button',{name:'Resume draft comment'}).click();await expect(page.locator('.anchor-footer')).toContainText('4 marks');
- const text='All tools '+Date.now();await page.getByLabel('Comment on photo',{exact:true}).fill(text);await page.getByRole('button',{name:'Send',exact:true}).click();await expect(page.locator('.anchor-thread')).toContainText(text);
- const id=page.url().split('/photos/')[1].split('?')[0];const data=await(await page.request.get(`/api/v1/photos/${id}/`)).json();const shapes=data.comments.find((c:{text:string})=>c.text===text).annotations;expect(shapes).toHaveLength(4);expect(shapes[2].points[0][0]).toBeCloseTo(.4,2);expect(shapes[2].points[1][1]).toBeCloseTo(.6,2);
- await page.getByRole('button',{name:'Close photo comment'}).click();await page.getByRole('button',{name:'Reset zoom',exact:true}).click();await expect(page.locator('.annotation-layer ellipse').first()).toBeVisible();
+test("all drawing tools retain normalized coordinates when zoomed", async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto(`/app/properties/${qa.property}`);
+  await page.locator(".photo-card").nth(1).click();
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "Draw", exact: true }).click();
+  let count = 0;
+  for (const tool of ["Pin", "Brush", "Rectangle", "Ellipse", "Arrow"]) {
+    await page.getByRole("button", { name: tool, exact: true }).click();
+    const box = (await page
+      .locator(".annotation-layer.is-drawing")
+      .boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.4);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.6, {
+      steps: 5,
+    });
+    await page.mouse.up();
+    count++;
+    await expect(page.locator(".anchor-footer")).toContainText(`${count} mark`);
+  }
+  await page.getByRole("button", { name: "Undo drawing", exact: true }).click();
+  await page.getByRole("button", { name: "Resume draft comment" }).click();
+  await expect(page.locator(".anchor-footer")).toContainText("4 marks");
+  const text = "All tools " + Date.now();
+  await page.getByLabel("Comment on photo", { exact: true }).fill(text);
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.locator(".anchor-thread")).toContainText(text);
+  const id = page.url().split("/photos/")[1].split("?")[0];
+  const data = await (await page.request.get(`/api/v1/photos/${id}/`)).json();
+  const shapes = data.comments.find(
+    (c: { text: string }) => c.text === text,
+  ).annotations;
+  expect(shapes).toHaveLength(4);
+  expect(shapes[2].points[0][0]).toBeCloseTo(0.4, 2);
+  expect(shapes[2].points[1][1]).toBeCloseTo(0.6, 2);
+  await page.getByRole("button", { name: "Close photo comment" }).click();
+  await page.getByRole("button", { name: "Reset zoom", exact: true }).click();
+  await expect(page.locator(".annotation-layer ellipse").first()).toBeVisible();
 });
-test("viewer menus and anchored conversations match the reference workflow",async({page})=>{
- await login(page);await page.goto(`/app/photos/${qa.photo}`);await expect(page.locator('.viewer-inspector')).toHaveCount(0);
- await expect(page.locator('.image-stage img')).toBeVisible();await expect.poll(()=>page.locator('.image-stage img').evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>0)).toBe(true);await page.screenshot({path:'test-results/01-viewer.png',animations:'disabled'});
- const fav=page.getByRole('button',{name:'Favorite photo',exact:true});const before=await fav.getAttribute('aria-pressed');await fav.click();await expect(fav).toHaveAttribute('aria-pressed',before==='true'?'false':'true');
- await page.getByRole('button',{name:'Photo status',exact:true}).click();await expect(page.getByRole('menuitem',{name:'Needs review',exact:true})).toBeVisible();await page.screenshot({path:'test-results/02-status-menu.png',animations:'disabled'});await page.keyboard.press('Escape');
- await page.getByRole('button',{name:'Color label',exact:true}).click();await page.screenshot({path:'test-results/03-label-menu.png',animations:'disabled'});await page.getByRole('menuitem',{name:'Blue',exact:true}).click();await expect(page.getByRole('button',{name:'Color label',exact:true})).toContainText('Blue');
- await page.getByRole('button',{name:'Draw',exact:true}).click();await page.getByRole('button',{name:'Brush',exact:true}).click();
- const box=(await page.locator('.annotation-layer.is-drawing').boundingBox())!;await page.mouse.move(box.x+box.width*.47,box.y+box.height*.31);await page.mouse.down();
- for(const [x,y] of [[.52,.29],[.57,.33],[.59,.42],[.56,.5],[.49,.51],[.46,.45],[.47,.31]])await page.mouse.move(box.x+box.width*x,box.y+box.height*y,{steps:4});await page.mouse.up();
- await expect(page.getByRole('dialog',{name:'Comment on drawing'})).toBeVisible();await expect(page.locator('.viewer-inspector')).toHaveCount(0);await page.screenshot({path:'test-results/04-anchored-comment.png',animations:'disabled'});
- const text='Please soften the highlights on these flowers. '+Date.now();await page.getByLabel('Comment on photo',{exact:true}).fill(text);await page.getByRole('button',{name:'Send',exact:true}).click();await expect(page.locator('.anchor-thread')).toContainText(text);
- await page.getByLabel('Reply on photo',{exact:true}).fill('Thank you — this is the area I mean.');await page.getByRole('button',{name:'Send',exact:true}).click();await expect(page.locator('.anchor-thread')).toContainText('Thank you');await page.screenshot({path:'test-results/05-photo-thread.png',animations:'disabled'});
- await page.getByRole('button',{name:'Close photo comment'}).click();await page.reload();await page.getByRole('button',{name:/Open photo comment/}).last().click();await expect(page.locator('.anchor-thread')).toContainText(text);
- await page.getByRole('button',{name:'Close photo comment'}).click();await page.getByRole('button',{name:'Viewer options'}).click();await page.getByRole('menuitem',{name:'File information',exact:true}).click();await expect(page.getByRole('dialog')).toContainText('JPEG');await page.getByRole('button',{name:'Close',exact:true}).click();
- await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:/Open photo comment/}).last().click();await expect(page.locator('.anchor-card')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'test-results/06-mobile-thread.png',animations:'disabled'});
+test("viewer menus and anchored conversations match the reference workflow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1407, height: 1256 });
+  await login(page);
+  await page.goto(`/app/photos/${qa.photo}`);
+  await page.getByRole("button", { name: "View version", exact: true }).click();
+  await page.getByRole("menuitem", { name: /Version 1/ }).click();
+  await expect(page.locator(".viewer-inspector")).toHaveCount(0);
+  await expect(page.locator(".image-stage img")).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .locator(".image-stage img")
+        .evaluate(
+          (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+        ),
+    )
+    .toBe(true);
+  await page.screenshot({
+    path: "test-results/01-viewer.png",
+    animations: "disabled",
+  });
+  const fav = page.getByRole("button", { name: "Favorite photo", exact: true });
+  const before = await fav.getAttribute("aria-pressed");
+  await fav.click();
+  await expect(fav).toHaveAttribute(
+    "aria-pressed",
+    before === "true" ? "false" : "true",
+  );
+  await page.getByRole("button", { name: "Photo status", exact: true }).click();
+  await expect(
+    page.getByRole("menuitem", { name: "Needs review", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/02-status-menu.png",
+    animations: "disabled",
+  });
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Color label", exact: true }).click();
+  await page.screenshot({
+    path: "test-results/03-label-menu.png",
+    animations: "disabled",
+  });
+  await page.getByRole("menuitem", { name: "Blue", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Color label", exact: true }),
+  ).toContainText("Blue");
+  await page.getByRole("button", { name: "Draw", exact: true }).click();
+  await page.getByRole("button", { name: "Brush", exact: true }).click();
+  const box = (await page
+    .locator(".annotation-layer.is-drawing")
+    .boundingBox())!;
+  await page.mouse.move(
+    box.x + box.width * (0.52 + 0.07 * Math.cos(0.8)),
+    box.y + box.height * (0.4 + 0.105 * Math.sin(0.8)),
+  );
+  await page.mouse.down();
+  for (let i = 1; i <= 48; i++) {
+    const angle = 0.8 + (i / 48) * Math.PI * 1.98;
+    await page.mouse.move(
+      box.x + box.width * (0.52 + 0.07 * Math.cos(angle)),
+      box.y + box.height * (0.4 + 0.105 * Math.sin(angle)),
+    );
+  }
+  await page.mouse.up();
+  await expect(
+    page.getByRole("dialog", { name: "Comment on drawing" }),
+  ).toBeVisible();
+  await expect(page.locator(".viewer-inspector")).toHaveCount(0);
+  await page.screenshot({
+    path: "test-results/04-anchored-comment.png",
+    animations: "disabled",
+  });
+  const text = "Please soften the highlights on these flowers. " + Date.now();
+  await page.getByLabel("Comment on photo", { exact: true }).fill(text);
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.locator(".anchor-thread")).toContainText(text);
+  await page
+    .getByLabel("Reply on photo", { exact: true })
+    .fill("Thank you — this is the area I mean.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.locator(".anchor-thread")).toContainText("Thank you");
+  await page.screenshot({
+    path: "test-results/05-photo-thread.png",
+    animations: "disabled",
+  });
+  await page.getByRole("button", { name: "Close photo comment" }).click();
+  await page.reload();
+  await page
+    .getByRole("button", { name: /Open photo comment/ })
+    .last()
+    .click();
+  await expect(page.locator(".anchor-thread")).toContainText(text);
+  await page.getByRole("button", { name: "Close photo comment" }).click();
+  await page.getByRole("button", { name: "Viewer options" }).click();
+  await page
+    .getByRole("menuitem", { name: "File information", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("JPEG");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .getByRole("button", { name: /Open photo comment/ })
+    .last()
+    .click();
+  await expect(page.locator(".anchor-card")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "test-results/06-mobile-thread.png",
+    animations: "disabled",
+  });
 });
 test("admin customizes settings and saves a reusable preset", async ({
   page,
@@ -90,8 +220,10 @@ test("customer downloads a review copy, uploads and records a gallery decision",
   await login(page);
   await page.goto(`/app/photos/${qa.photo}`);
   const download = page.waitForEvent("download");
-  await page.getByRole("button",{name:"Viewer options"}).click();
-  await page.getByRole("menuitem",{name:"Download review copy",exact:true}).click();
+  await page.getByRole("button", { name: "Viewer options" }).click();
+  await page
+    .getByRole("menuitem", { name: "Download review copy", exact: true })
+    .click();
   expect((await download).suggestedFilename()).toContain("-review.jpg");
   await page.goto(`/app/properties/${qa.property}`);
   await page
