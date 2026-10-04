@@ -34,7 +34,7 @@ retry identifiers. Comment resolution never implies approval.
 
 CSP keeps scripts self-only and blocks eval. `style-src-attr 'unsafe-inline'` is
 limited to style attributes required by accessible popover positioning and image
-transforms; style elements remain self-only. The Lottie light player is used to
+transforms; style elements require same-origin loading or the per-response nonce passed to the dialog stylesheet helper. The Lottie light player is used to
 avoid expression eval. The checkmark animation is original and loaded on success.
 
 Phase P7 is not implemented: freehand/pin annotations, new threaded comments,
