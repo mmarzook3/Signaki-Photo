@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from proofs.features import allowed, require, visible_version, settings_for
 from proofs.models import Property, Group, Photo, Version, Comment, Profile
 from proofs.forms import PropertyForm, CustomerForm, GroupForm, PhotoForm
 from proofs.views import properties, photos, add_version, login_view
@@ -108,11 +109,11 @@ class PropertyDetail(APIView):
 
     def get(self, request, pk):
         obj = get_object_or_404(property_queryset(request), pk=pk)
-        images = photos(request).filter(property=obj).select_related('group').prefetch_related('versions')
+        images = photos(request).filter(property=obj).select_related('group','property').prefetch_related('versions','favorites')
         return Response({
             'property': PropertySerializer(obj, context={'request': request}).data,
             'groups': GroupSerializer(obj.groups.all(), many=True).data,
-            'photos': PhotoSerializer(images, many=True).data,
+            'photos': PhotoSerializer(images, many=True, context={'request':request}).data,
         })
 
     def patch(self, request, pk):
@@ -150,9 +151,13 @@ class PhotoDetail(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        obj = get_object_or_404(photos(request).select_related('property', 'group').prefetch_related('versions'), pk=pk)
+        obj = get_object_or_404(photos(request).select_related('property', 'group').prefetch_related('versions','favorites'), pk=pk)
         comments = Comment.objects.filter(version__photo=obj).select_related('version__photo__property', 'author')
-        return Response({'photo': PhotoSerializer(obj).data, 'comments': CommentSerializer(comments, many=True).data})
+        if not allowed(request.user, obj.property, 'comments'):
+            comments = comments.none()
+        if not allowed(request.user, obj.property, 'versioning'):
+            comments = comments.filter(version=obj.latest)
+        return Response({'photo': PhotoSerializer(obj, context={'request':request}).data, 'comments': CommentSerializer(comments, many=True).data})
 
     def patch(self, request, pk):
         staff(request)
@@ -175,9 +180,13 @@ class Decision(APIView):
         data = data.validated_data
         with transaction.atomic():
             version = get_object_or_404(Version.objects.select_for_update().filter(photo__in=photos(request)), pk=pk)
+            require(request.user, version.photo.property, 'asset_status')
+            visible_version(request.user, version)
+            if data['decision'] not in settings_for(version.photo.property)['allowed_statuses']:
+                raise ValidationError('This review state is disabled.')
             previous = Comment.objects.filter(request_id=data['request_id']).first()
             if previous:
-                if previous.author_id != request.user.pk or previous.version_id != version.pk or previous.decision != data['decision'] or previous.text != (data['text'].strip() or 'Photo approved.'):
+                if previous.author_id != request.user.pk or previous.version_id != version.pk or previous.decision != data['decision'] or previous.text != (data['text'].strip() or ('Photo approved.' if data['decision'] == 'approved' else 'Review in progress.')):
                     raise ValidationError('Request identifier has already been used.')
                 return Response(VersionSerializer(version).data)
             if version.review_revision != data['expected_revision']:
@@ -185,7 +194,7 @@ class Decision(APIView):
             version.status = data['decision']
             version.review_revision += 1
             version.save(update_fields=['status', 'review_revision'])
-            Comment.objects.create(version=version, author=request.user, decision=data['decision'], text=data['text'].strip() or 'Photo approved.', resolved=data['decision'] == 'approved', request_id=data['request_id'])
+            Comment.objects.create(version=version, author=request.user, decision=data['decision'], text=data['text'].strip() or ('Photo approved.' if data['decision'] == 'approved' else 'Review in progress.'), resolved=data['decision'] == 'approved', request_id=data['request_id'])
         return Response(VersionSerializer(version).data)
 
 
@@ -195,12 +204,19 @@ class Comments(APIView):
     @extend_schema(request=CommentInput, responses=CommentSerializer)
     def post(self, request, pk):
         version = get_object_or_404(Version.objects.filter(photo__in=photos(request)), pk=pk)
+        require(request.user, version.photo.property, 'comments')
+        visible_version(request.user, version)
         data = CommentInput(data=request.data)
         data.is_valid(raise_exception=True)
         data = data.validated_data
+        if data['annotations']:
+            require(request.user, version.photo.property, 'annotations')
+        parent = None
+        if data['parent_id']:
+            parent = get_object_or_404(Comment, pk=data['parent_id'], version=version, parent__isnull=True)
         with transaction.atomic():
-            comment, created = Comment.objects.get_or_create(request_id=data['request_id'], defaults={'version': version, 'author': request.user, 'text': data['text']})
-            if comment.author_id != request.user.pk or comment.version_id != version.pk or comment.text != data['text'] or comment.decision:
+            comment, created = Comment.objects.get_or_create(request_id=data['request_id'], defaults={'version': version, 'author': request.user, 'text': data['text'], 'annotations':data['annotations'], 'parent':parent})
+            if comment.author_id != request.user.pk or comment.version_id != version.pk or comment.text != data['text'] or comment.decision or comment.annotations != data['annotations'] or comment.parent_id != data['parent_id']:
                 raise ValidationError('Request identifier has already been used.')
         return Response(CommentSerializer(comment).data, status=201 if created else 200)
 
@@ -217,6 +233,7 @@ class Resolve(APIView):
             raise ValidationError({'resolved': 'A boolean is required.'})
         obj.resolved = request.data['resolved']
         obj.save(update_fields=['resolved'])
+        obj.replies.update(resolved=obj.resolved)
         return Response({'ok': True})
 
 
@@ -281,8 +298,8 @@ class Upload(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        staff(request)
-        prop = get_object_or_404(Property, pk=pk)
+        prop = get_object_or_404(properties(request), pk=pk)
+        require(request.user, prop, 'upload')
         group = None
         if request.data.get('group'):
             try:

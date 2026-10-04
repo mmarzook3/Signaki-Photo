@@ -38,7 +38,7 @@ class IsolationTests(TestCase):
   self.photo.hidden=True;self.photo.save();self.assertEqual(self.client.get(f'/proof/{self.v.pk}/image/').status_code,404)
   self.photo.hidden=False;self.photo.save();self.p.archived=True;self.p.save();self.assertEqual(self.client.get(f'/proof/{self.v.pk}/thumb/').status_code,404)
  def test_watermark_is_pixels_metadata_stripped_and_no_original(self):
-  files=list(Path(self.temp.name).iterdir());self.assertEqual(len(files),2)
+  files=list(Path(self.temp.name).iterdir());self.assertEqual(len(files),4)
   with Image.open(Path(self.temp.name)/self.v.image) as im:
    self.assertLessEqual(max(im.size),1280);self.assertNotIn('exif',im.info);self.assertGreater(len(im.getcolors(im.width*im.height)),20)
  def test_video_rejected(self):

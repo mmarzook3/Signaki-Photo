@@ -132,8 +132,8 @@ def add_version(photo,upload,note=''):
    photo=Photo.objects.select_for_update().get(pk=photo.pk)
    number=(photo.versions.aggregate(n=Max('number'))['n'] or 0)+1
    label=f'{photo.name} · v{number}'
-   paths=make_proofs(upload,label)
-   return Version.objects.create(photo=photo,number=number,image=paths[0],thumb=paths[1],label=label,note=note[:500])
+   paths=make_proofs(upload,label,store_clean=True)
+   return Version.objects.create(photo=photo,number=number,image=paths[0],thumb=paths[1],clean_image=paths[2],clean_thumb=paths[3],label=label,note=note[:500])
  except Exception:
   for name in paths:(Path(settings.MEDIA_ROOT)/name).unlink(missing_ok=True)
   raise
@@ -174,6 +174,10 @@ def photo_edit(request,pk):
 @login_required
 def photo_detail(request,pk):
  photo=get_object_or_404(photos(request),pk=pk);versions=photo.versions.all()
+ from .features import allowed,settings_for
+ if not allowed(request.user,photo.property,'versioning'):versions=versions.filter(pk=photo.latest.pk if photo.latest else None)
+ if request.method=='POST' and not allowed(request.user,photo.property,'asset_status' if request.POST.get('decision') else 'comments'):raise Http404
+ if request.POST.get('decision') and request.POST['decision'] not in settings_for(photo.property)['allowed_statuses']:raise Http404
  selected=get_object_or_404(versions,pk=valid_uuid(request.GET['version'])) if request.GET.get('version') else versions.first()
  if not selected:raise Http404
  form=CommentForm(request.POST or None)
@@ -196,7 +200,8 @@ def photo_detail(request,pk):
   target=get_object_or_404(versions,pk=valid_uuid(request.POST.get('version')))
   c=form.save(commit=False);c.version=target;c.author=request.user;c.save();messages.success(request,'Comment saved on version '+str(target.number)+'.')
   return redirect(str(request.path)+'?version='+str(target.pk)+('&view=grouped' if request.GET.get('view')=='grouped' else ''))
- comments=Comment.objects.filter(version__photo=photo).select_related('version','author')
+ comments=Comment.objects.filter(version__in=versions).select_related('version','author')
+ if not allowed(request.user,photo.property,'comments'):comments=comments.none()
  grouped=request.GET.get('view')=='grouped'
  sequence=photos(request).filter(property_id=photo.property_id,versions__isnull=False).distinct()
  if grouped:sequence=sequence.filter(group_id=photo.group_id)
@@ -218,6 +223,10 @@ def feedback(request):
 def proof(request,pk,size):
  if size not in {'image','thumb'}:raise Http404
  v=get_object_or_404(Version.objects.filter(photo__in=photos(request)),pk=pk)
- path=Path(settings.MEDIA_ROOT)/getattr(v,size)
+ from .features import visible_version
+ from .api.collaboration import review_path
+ try:visible_version(request.user,v)
+ except Exception:raise Http404
+ path=review_path(v,size)
  if not path.is_file():raise Http404
  response=FileResponse(path.open('rb'),content_type='image/jpeg');response['Content-Disposition']='inline; filename="review-proof.jpg"';return response

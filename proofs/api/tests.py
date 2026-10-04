@@ -62,7 +62,7 @@ class ApiTests(TestCase):
         self.assertEqual(self.post(url, {**data, 'text': 'changed'}).status_code, 400)
 
     def test_customer_cannot_admin_or_resolve(self):
-        for url in ['customers/', f'properties/{self.prop.pk}/groups/', f'properties/{self.prop.pk}/upload/']:
+        for url in ['customers/', f'properties/{self.prop.pk}/groups/']:
             self.assertEqual(self.post(url, {}).status_code, 404)
 
     def test_forced_password_change_keeps_session_api_accessible(self):

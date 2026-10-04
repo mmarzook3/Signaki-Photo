@@ -2,6 +2,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
+from proofs.features import settings_for, allowed
+from proofs.annotations import validate_annotations
 from proofs.models import Property, Group, Photo, Version, Comment
 
 
@@ -36,11 +38,24 @@ class PhotoSerializer(serializers.ModelSerializer):
     property_id = serializers.UUIDField(read_only=True)
     group_id = serializers.IntegerField(read_only=True, allow_null=True)
     latest = serializers.SerializerMethodField()
-    versions = VersionSerializer(many=True, read_only=True)
+    versions = serializers.SerializerMethodField()
+    favorite = serializers.SerializerMethodField()
+
+    def get_favorite(self, obj) -> bool:
+        request = self.context.get('request')
+        return bool(request and any(f.user_id == request.user.pk for f in obj.favorites.all()))
+
+    @extend_schema_field(VersionSerializer(many=True))
+    def get_versions(self, obj):
+        request = self.context.get('request')
+        versions = list(obj.versions.all())
+        if request and not allowed(request.user, obj.property, 'versioning'):
+            versions = versions[:1]
+        return VersionSerializer(versions, many=True).data
 
     class Meta:
         model = Photo
-        fields = ['id', 'property_id', 'name', 'group_id', 'position', 'hidden', 'latest', 'versions']
+        fields = ['id', 'property_id', 'name', 'group_id', 'position', 'hidden', 'latest', 'versions', 'favorite', 'color_label']
 
     @extend_schema_field(VersionSerializer(allow_null=True))
     def get_latest(self, obj):
@@ -57,11 +72,19 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'version_id', 'version_number', 'photo_id', 'photo_name', 'property_name', 'author', 'text', 'decision', 'resolved', 'created']
+        fields = ['id', 'version_id', 'version_number', 'photo_id', 'photo_name', 'property_name', 'author', 'text', 'decision', 'resolved', 'created', 'annotations', 'parent']
 
 
 class PropertySerializer(serializers.ModelSerializer):
     customer = UserSerializer(read_only=True)
+    review_settings = serializers.SerializerMethodField()
+    watermark_locked = serializers.SerializerMethodField()
+
+    def get_review_settings(self, obj) -> dict:
+        return settings_for(obj)
+
+    def get_watermark_locked(self, obj) -> bool:
+        return obj.photos.filter(versions__clean_image='').exists()
     delivery_url = serializers.SerializerMethodField()
     cover = serializers.SerializerMethodField()
     photo_count = serializers.SerializerMethodField()
@@ -69,7 +92,7 @@ class PropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Property
-        fields = ['id', 'name', 'address', 'customer', 'archived', 'delivery_url', 'delivery_shared', 'cover', 'photo_count', 'reviewed_count']
+        fields = ['id', 'name', 'address', 'customer', 'archived', 'delivery_url', 'delivery_shared', 'cover', 'photo_count', 'reviewed_count', 'review_settings', 'review_status', 'review_revision', 'watermark_locked']
 
     def visible_photos(self, obj):
         staff = self.context['request'].user.is_staff
@@ -92,18 +115,24 @@ class PropertySerializer(serializers.ModelSerializer):
 
 
 class DecisionInput(serializers.Serializer):
-    decision = serializers.ChoiceField(choices=['approved', 'rejected', 'review'])
+    decision = serializers.ChoiceField(choices=['approved', 'rejected', 'review', 'in_progress'])
     text = serializers.CharField(max_length=4000, required=False, allow_blank=True, default='')
     expected_revision = serializers.IntegerField(min_value=0)
     request_id = serializers.UUIDField()
 
     def validate(self, data):
-        if data['decision'] != 'approved' and not data['text'].strip():
+        if data['decision'] in {'rejected', 'review'} and not data['text'].strip():
             raise serializers.ValidationError({'text': 'Please explain why the photo is not needed or what changes you need.'})
         return data
 
 
 class CommentInput(serializers.Serializer):
+    annotations = serializers.JSONField(required=False, default=list)
+    parent_id = serializers.UUIDField(required=False, allow_null=True, default=None)
+
+    def validate_annotations(self, value):
+        return validate_annotations(value)
+
     text = serializers.CharField(max_length=4000, trim_whitespace=True)
     request_id = serializers.UUIDField()
 

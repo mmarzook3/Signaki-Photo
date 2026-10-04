@@ -1,4 +1,4 @@
-"""Discard uploads; persist only stripped, raster-watermarked review derivatives."""
+"""Discard uploads; persist stripped, low-resolution review derivatives only."""
 import io,uuid,warnings
 from pathlib import Path
 from PIL import Image,ImageOps,ImageDraw,ImageFont,ImageCms
@@ -25,7 +25,8 @@ def derivative(image,label,width):
  while draw.textbbox((0,0),caption,font=label_font)[2]>w-20 and len(caption)>10:caption=caption[:-2]
  draw.text((10,h-bar+max(3,bar//5)),caption,font=label_font,fill='white')
  return image
-def make_proofs(upload,label):
+def make_proofs(upload,label,store_clean=False):
+ paths=[]
  if upload.size>25*1024*1024:raise ValidationError('Each photo must be smaller than 25 MB.')
  try:
   with warnings.catch_warnings():
@@ -43,6 +44,14 @@ def make_proofs(upload,label):
     name=uuid.uuid4().hex+'.jpg';p=root/name
     derivative(im,label,width).save(p,format='JPEG',quality=72,optimize=True)
     paths.append(name)
+   if store_clean:
+    for width in [1280,480]:
+     clean=im.copy();clean.thumbnail((width,width),Image.Resampling.LANCZOS)
+     name=uuid.uuid4().hex+'.jpg';clean.save(root/name,format='JPEG',quality=72,optimize=True);paths.append(name)
    return paths
- except ValidationError:raise
- except (OSError,ValueError,Image.DecompressionBombError,Image.DecompressionBombWarning) as exc:raise ValidationError('Cannot safely read this photograph.') from exc
+ except ValidationError:
+  for name in paths:(Path(settings.MEDIA_ROOT)/name).unlink(missing_ok=True)
+  raise
+ except (OSError,ValueError,Image.DecompressionBombError,Image.DecompressionBombWarning) as exc:
+  for name in paths:(Path(settings.MEDIA_ROOT)/name).unlink(missing_ok=True)
+  raise ValidationError('Cannot safely read this photograph.') from exc
