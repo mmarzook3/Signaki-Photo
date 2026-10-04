@@ -2006,3 +2006,7 @@ progress::-moz-progress-bar {
     max-height: 65vh;
   }
 }
+
+.viewer-controls select,.drawing-toolbar select,.gallery-actions .decision-select{width:auto;max-width:180px;border-radius:22px;background:#242a34;border:0;height:34px;font-size:12px}
+.viewer-controls{row-gap:8px}.viewer-controls .version-control{order:-1}
+@media(max-width:650px){.viewer-controls select{max-width:140px;font-size:11px}.viewer-bottom{max-height:40vh;overflow:auto}}

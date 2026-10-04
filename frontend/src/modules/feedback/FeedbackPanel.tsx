@@ -186,7 +186,7 @@ export function FeedbackPanel({
               <p>{c.text}</p>
               {c.annotations?.length > 0 && (
                 <span className="caption">
-                  {c.annotations.length} annotation(s) � v{c.version_number}
+                  {c.annotations.length} annotation(s) · v{c.version_number}
                 </span>
               )}
               {commentsAllowed && c.version_id === version.id && (

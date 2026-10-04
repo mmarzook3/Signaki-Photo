@@ -420,7 +420,7 @@ export function Viewer() {
               </Button>
             </div>
             <p className="proof-note">
-              Watermarked review proof · Full-quality delivery is separate
+              Review copy · Full-quality delivery is separate
             </p>
             {selected.note && <p className="version-note">{selected.note}</p>}
           </div>

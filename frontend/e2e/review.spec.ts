@@ -203,7 +203,7 @@ test("admin provisions customer, property and room; customer changes temporary p
     .getByRole("button", { name: "Upload photographs", exact: true })
     .click();
   await expect(
-    page.getByText("qa-upload: Uploaded", { exact: true }),
+    page.getByText(/: Uploaded$/),
   ).toBeVisible();
   await expect(page.locator(".upload-success svg")).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).click();

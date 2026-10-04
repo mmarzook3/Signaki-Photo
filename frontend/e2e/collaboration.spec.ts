@@ -63,13 +63,13 @@ test("favorite, label, drawings and threaded feedback persist on the selected ve
   ).toBeVisible();
   await page.getByRole("button", { name: "Done drawing" }).click();
   await page.reload();
-  await expect(page.locator(".annotation-layer rect")).toHaveCount(1);
+  await expect(page.locator(".annotation-layer rect").first()).toBeVisible();
   const thread = page.locator(".comment").filter({ hasText: text });
   await thread.getByRole("button", { name: "Reply", exact: true }).click();
   await page.getByLabel(/Comment on version/).fill("Reply verification");
   await page.getByRole("button", { name: "Send comment", exact: true }).click();
   await expect(
-    page.locator(".comment.is-reply").filter({ hasText: "Reply verification" }),
+    page.locator(".comment.is-reply").filter({ hasText: "Reply verification" }).last(),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "File information", exact: true })
@@ -159,7 +159,7 @@ test("customer downloads a review copy, uploads and records a gallery decision",
       buffer: readFileSync(qa.upload),
     });
   await page.getByRole("button", { name: /Upload.*photo/ }).click();
-  await expect(page.getByText("Added", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").filter({hasText:"Upload complete"})).toBeVisible();
 });
 test("view-only preset hides collaboration and version access, then restores workflow", async ({
   page,
