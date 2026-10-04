@@ -1,3 +1,11 @@
+import { ViewerMenu, ViewerMenuItem } from "@/modules/viewer/ViewerMenu";
+import {
+  CheckCircle2,
+  XCircle,
+  CircleDot,
+  Clock,
+  ChevronDown,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { write, message } from "@/api/client";
@@ -32,27 +40,74 @@ export function DecisionControl({
   const query = useQueryClient();
   return (
     <>
-      <select
-        className="decision-select"
-        aria-label={gallery ? "Gallery status" : "Photo status"}
-        value=""
-        onChange={(e) => {
-          key.current = crypto.randomUUID();
-          setError("");
-          setReason("");
-          setChoice(e.target.value);
-        }}
-      >
-        <option value="">
-          {gallery ? "Gallery: " : ""}
-          {statuses[status as keyof typeof statuses] || status}
-        </option>
-        {choices.map((s) => (
-          <option key={s} value={s}>
-            {statuses[s as keyof typeof statuses] || s}
+      {gallery ? (
+        <select
+          className="decision-select"
+          aria-label={gallery ? "Gallery status" : "Photo status"}
+          value=""
+          onChange={(e) => {
+            key.current = crypto.randomUUID();
+            setError("");
+            setReason("");
+            setChoice(e.target.value);
+          }}
+        >
+          <option value="">
+            {gallery ? "Gallery: " : ""}
+            {statuses[status as keyof typeof statuses] || status}
           </option>
-        ))}
-      </select>
+          {choices.map((s) => (
+            <option key={s} value={s}>
+              {statuses[s as keyof typeof statuses] || s}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <ViewerMenu
+          label="Photo status"
+          trigger={
+            <>
+              <CheckCircle2 />
+              <span>
+                {status === "pending"
+                  ? "Approve"
+                  : statuses[status as keyof typeof statuses] || status}
+              </span>
+              <ChevronDown size={17} />
+            </>
+          }
+        >
+          {["rejected", "review", "in_progress", "approved"]
+            .filter((s) => choices.includes(s))
+            .map((s) => {
+              const Icon = {
+                rejected: XCircle,
+                review: CircleDot,
+                in_progress: Clock,
+                approved: CheckCircle2,
+              }[s]!;
+              return (
+                <ViewerMenuItem
+                  key={s}
+                  selected={s === status}
+                  onSelect={() => {
+                    key.current = crypto.randomUUID();
+                    setError("");
+                    setReason("");
+                    setChoice(s);
+                  }}
+                >
+                  <Icon className={`review-status-${s}`} />
+                  <span>
+                    {s === "review"
+                      ? "Needs review"
+                      : statuses[s as keyof typeof statuses]}
+                  </span>
+                </ViewerMenuItem>
+              );
+            })}
+        </ViewerMenu>
+      )}
       <Dialog
         open={Boolean(choice)}
         onOpenChange={(v) => {

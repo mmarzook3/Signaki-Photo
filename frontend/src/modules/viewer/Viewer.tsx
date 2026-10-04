@@ -1,3 +1,7 @@
+import "./viewer.css";
+import { DrawingToolbar } from "./DrawingToolbar";
+import { AnchoredConversation } from "./AnchoredConversation";
+import { Images } from "lucide-react";
 import { ReviewTools } from "@/modules/review/ReviewTools";
 import type { Annotation } from "@/modules/review/types";
 import type { DrawTool } from "@/modules/review/AnnotationLayer";
@@ -16,7 +20,6 @@ import {
   ChevronLeft,
   ChevronRight,
   PanelRight,
-  Columns2,
   Maximize,
   Settings2,
   Upload,
@@ -41,10 +44,12 @@ export function Viewer() {
   const navigate = useNavigate();
   const user = useUser();
   const [tool, setTool] = useState<DrawTool>(null);
-  const [color, setColor] = useState<Annotation["color"]>("#ffcc45");
+  const [color, setColor] = useState<Annotation["color"]>("#70b7ff");
   const shapes = useDrafts((s) => s.shapes);
   const setShapes = useDrafts((s) => s.setShapes);
-  const [panel, setPanel] = useState(true);
+  const [panel, setPanel] = useState(false);
+  const [filmstrip, setFilmstrip] = useState(false);
+  const [conversation, setConversation] = useState<string | null>(null);
   const [compare, setCompare] = useState(false);
   const [comparison, setComparison] = useState("");
   const [edit, setEdit] = useState<"settings" | "replacement" | null>(null);
@@ -87,6 +92,7 @@ export function Viewer() {
   const previous = items[index - 1];
   const next = items[index + 1];
   function move(id: string) {
+    setConversation(null);
     setTool(null);
     setCompare(false);
     setComparison("");
@@ -100,9 +106,9 @@ export function Viewer() {
     const handle = (e: KeyboardEvent) => {
       if (
         (e.target as HTMLElement)?.closest(
-          "input,textarea,select,[contenteditable],[role=dialog]",
+          "input,textarea,select,[contenteditable],[role=dialog],[role=menu]",
         ) ||
-        document.querySelector("[role=dialog]") ||
+        document.querySelector("[role=dialog],[role=menu]") ||
         e.metaKey ||
         e.ctrlKey ||
         e.altKey
@@ -144,15 +150,34 @@ export function Viewer() {
   const other =
     photo.versions.find((v) => v.id === comparison && v.id !== selected.id) ||
     photo.versions.find((v) => v.id !== selected.id);
-  const versionChange = (id: string) =>
-    navigate({
+  const versionChange = (id: string) => {
+    setConversation(null);
+    setTool(null);
+    return navigate({
       to: "/app/photos/$photoId",
       params: { photoId },
       search: { ...search, version: id },
       replace: true,
     });
+  };
+  const settings = gallery.data.property.review_settings;
+  const visibleThreads = can(user.is_staff, settings, "annotations")
+    ? details.data.comments.filter(
+        (c) =>
+          c.version_id === selected.id && !c.parent && c.annotations.length,
+      )
+    : [];
+  const thread = visibleThreads.find((c) => c.id === conversation) || null;
+  const draftShapes = shapes[selected.id] || NO_SHAPES;
+  const anchor =
+    conversation === "draft"
+      ? draftShapes.at(-1)?.points.at(-1) || ([0.5, 0.5] as [number, number])
+      : thread?.annotations.at(-1)?.points.at(-1) || null;
   return (
-    <div ref={root} className={`viewer ${panel ? "with-inspector" : ""}`}>
+    <div
+      ref={root}
+      className={`viewer viewer-v2 ${panel ? "with-inspector" : ""}`}
+    >
       <header className="viewer-header">
         <Link
           to="/app/properties/$propertyId"
@@ -177,6 +202,15 @@ export function Viewer() {
           {index + 1} / {items.length}
         </span>
         <div className="viewer-header-actions">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Show thumbnails"
+            aria-pressed={filmstrip}
+            onClick={() => setFilmstrip(!filmstrip)}
+          >
+            <Images size={19} />
+          </Button>
           {user.is_staff && (
             <>
               <Button
@@ -251,6 +285,32 @@ export function Viewer() {
                         .flatMap((c) => c.annotations)
                     : NO_SHAPES
                 }
+                threads={visibleThreads}
+                activeThread={conversation}
+                onThread={(id) => {
+                  setConversation(id);
+                  setTool(null);
+                }}
+                anchor={anchor}
+                composer={
+                  conversation && anchor ? (
+                    <AnchoredConversation
+                      key={`${selected.id}-${conversation}`}
+                      photo={photo}
+                      version={selected}
+                      thread={thread}
+                      replies={details.data.comments.filter(
+                        (c) => c.parent === thread?.id,
+                      )}
+                      canComment={can(user.is_staff, settings, "comments")}
+                      onClose={() => setConversation(null)}
+                      onSent={(id) => {
+                        setTool(null);
+                        setConversation(id);
+                      }}
+                    />
+                  ) : null
+                }
                 draft={shapes[selected.id] || NO_SHAPES}
                 tool={
                   can(
@@ -258,13 +318,15 @@ export function Viewer() {
                     gallery.data.property.review_settings,
                     "annotations",
                   )
-                    ? tool
+                    ? conversation
+                      ? null
+                      : tool
                     : null
                 }
                 color={color}
                 onChange={(s) => {
                   setShapes(selected.id, s);
-                  setPanel(true);
+                  setConversation("draft");
                 }}
               />
             </div>
@@ -303,125 +365,85 @@ export function Viewer() {
             <ChevronRight size={33} />
           </button>
           <div className="viewer-bottom">
-            <nav className="filmstrip" aria-label="Nearby photographs">
-              {items.slice(Math.max(0, index - 4), index + 5).map((p) => (
-                <button
-                  key={p.id}
-                  aria-current={p.id === photoId ? "page" : undefined}
-                  title={p.name}
-                  onClick={() => move(p.id)}
-                >
-                  <img src={p.latest!.thumb_url} alt={p.name} />
-                </button>
-              ))}
-            </nav>
-            {tool && (
-              <div className="drawing-toolbar" aria-label="Drawing tools">
-                <select
-                  aria-label="Drawing tool"
-                  value={tool}
-                  onChange={(e) => setTool(e.target.value as DrawTool)}
-                >
-                  {["pin", "pen", "rectangle", "ellipse", "arrow"].map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  aria-label="Drawing color"
-                  value={color}
-                  onChange={(e) =>
-                    setColor(e.target.value as Annotation["color"])
-                  }
-                >
-                  <option value="#ffcc45">Yellow</option>
-                  <option value="#ff7185">Pink</option>
-                  <option value="#70b7ff">Blue</option>
-                </select>
-                <Button
-                  variant="ghost"
-                  disabled={!shapes[selected.id]?.length}
-                  onClick={() =>
-                    setShapes(
-                      selected.id,
-                      (shapes[selected.id] || []).slice(0, -1),
-                    )
-                  }
-                >
-                  Undo
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setShapes(selected.id, [])}
-                >
-                  Clear draft
-                </Button>
-                <Button variant="ghost" onClick={() => setTool(null)}>
-                  Done drawing
-                </Button>
-                <span className="caption">
-                  Add a comment to save your marks.
-                </span>
-              </div>
+            {filmstrip && (
+              <nav className="filmstrip" aria-label="Nearby photographs">
+                {items.slice(Math.max(0, index - 4), index + 5).map((p) => (
+                  <button
+                    key={p.id}
+                    aria-current={p.id === photoId ? "page" : undefined}
+                    title={p.name}
+                    onClick={() => move(p.id)}
+                  >
+                    <img src={p.latest!.thumb_url} alt={p.name} />
+                  </button>
+                ))}
+              </nav>
             )}
-            <div className="viewer-controls">
-              <ReviewTools
-                photo={photo}
-                property={gallery.data.property}
-                version={selected}
-                drawing={Boolean(tool)}
-                onComment={() => {
-                  setPanel(true);
-                  setTimeout(
-                    () => document.getElementById("new-comment")?.focus(),
-                    0,
-                  );
+            {tool ? (
+              <DrawingToolbar
+                tool={tool}
+                color={color}
+                count={draftShapes.length}
+                onTool={(v) => {
+                  setTool(v);
+                  setConversation(null);
                 }}
-                onDraw={() => {
-                  setTool(tool ? null : "pen");
-                  setPanel(true);
+                onColor={(v) => {
+                  setColor(v);
+                  setConversation(null);
+                }}
+                onUndo={() => {
+                  setShapes(selected.id, draftShapes.slice(0, -1));
+                  setConversation(null);
+                }}
+                onClear={() => {
+                  setShapes(selected.id, []);
+                  setConversation(null);
+                }}
+                onClose={() => {
+                  setTool(null);
+                  setConversation(null);
                 }}
               />
-              {can(
-                user.is_staff,
-                gallery.data.property.review_settings,
-                "versioning",
-              ) && (
-                <label className="version-control">
-                  <span className="sr-only">View version</span>
-                  <select
-                    aria-label="View version"
-                    value={selected.id}
-                    onChange={(e) => versionChange(e.target.value)}
-                  >
-                    {photo.versions.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        Version {v.number}
-                        {v.id === photo.latest?.id ? " · Latest" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              {photo.versions.length > 1 && (
-                <Button
-                  variant="ghost"
-                  aria-pressed={compare}
-                  onClick={() => setCompare(!compare)}
-                >
-                  <Columns2 size={17} />
-                  {compare ? "Close comparison" : "Compare"}
-                </Button>
-              )}
-              <Button variant="ghost" onClick={() => setPanel(!panel)}>
-                <PanelRight size={17} />
-                Feedback
-              </Button>
-            </div>
-            <p className="proof-note">
-              Review copy · Full-quality delivery is separate
-            </p>
+            ) : (
+              <div className="viewer-controls">
+                <ReviewTools
+                  photo={photo}
+                  property={gallery.data.property}
+                  version={selected}
+                  drawing={false}
+                  onVersion={versionChange}
+                  compare={compare}
+                  onCompare={() => {
+                    setCompare(!compare);
+                    setConversation(null);
+                  }}
+                  panel={panel}
+                  onPanel={() => setPanel(!panel)}
+                  onComment={() => {
+                    setPanel(false);
+                    if (can(user.is_staff, settings, "annotations")) {
+                      setTool("pin");
+                      setConversation(null);
+                    } else setConversation("draft");
+                  }}
+                  onDraw={() => {
+                    setTool("pen");
+                    setPanel(false);
+                    setConversation(null);
+                  }}
+                />
+              </div>
+            )}
+            {tool && (
+              <p className="drawing-hint">
+                {conversation
+                  ? "Add your comment beside the mark."
+                  : tool === "pin"
+                    ? "Click on the photo to leave a comment."
+                    : "Draw on the photo to start a conversation."}
+              </p>
+            )}
             {selected.note && <p className="version-note">{selected.note}</p>}
           </div>
         </div>

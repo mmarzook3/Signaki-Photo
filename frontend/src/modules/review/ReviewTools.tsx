@@ -1,3 +1,11 @@
+import { ViewerMenu, ViewerMenuItem } from "@/modules/viewer/ViewerMenu";
+import {
+  ChevronDown,
+  Circle,
+  Layers,
+  Columns2,
+  PanelRight,
+} from "lucide-react";
 import { useState } from "react";
 import {
   Heart,
@@ -30,7 +38,17 @@ export function ReviewTools({
   onComment,
   onDraw,
   drawing,
+  onVersion,
+  compare,
+  onCompare,
+  panel,
+  onPanel,
 }: {
+  onVersion: (id: string) => void;
+  compare: boolean;
+  onCompare: () => void;
+  panel: boolean;
+  onPanel: () => void;
   photo: Photo;
   property: Property;
   version: Version;
@@ -77,8 +95,33 @@ export function ReviewTools({
   }
   return (
     <>
+      {allowed("versioning") && (
+        <ViewerMenu
+          label="View version"
+          trigger={
+            <>
+              <Layers />
+              <span>V{version.number}</span>
+              <ChevronDown size={16} />
+            </>
+          }
+        >
+          {photo.versions.map((v) => (
+            <ViewerMenuItem
+              key={v.id}
+              selected={v.id === version.id}
+              onSelect={() => onVersion(v.id)}
+            >
+              <Layers />
+              <span>Version {v.number}</span>
+              {v.id === photo.latest?.id && <small>Latest</small>}
+            </ViewerMenuItem>
+          ))}
+        </ViewerMenu>
+      )}
       {allowed("favorites") && (
         <Button
+          className="review-pill"
           variant="ghost"
           size="icon"
           aria-label="Favorite photo"
@@ -102,65 +145,102 @@ export function ReviewTools({
         />
       )}
       {allowed("color_labels") && (
-        <select
-          aria-label="Color label"
-          value={photo.color_label}
-          disabled={busy}
-          onChange={(e) =>
-            change(`photos/${photo.id}/label/`, { label: e.target.value })
+        <ViewerMenu
+          label="Color label"
+          trigger={
+            <>
+              <span
+                className="color-swatch"
+                style={{
+                  color:
+                    s.labels.find((x) => x.id === photo.color_label)?.color ||
+                    "#fff",
+                }}
+              />
+              <span>
+                {s.labels.find((x) => x.id === photo.color_label)?.name ||
+                  "Label"}
+              </span>
+              <ChevronDown size={17} />
+            </>
           }
         >
-          <option value="">Label</option>
           {s.labels
             .filter((x) => x.enabled)
             .map((x) => (
-              <option key={x.id} value={x.id}>
-                {x.name}
-              </option>
+              <ViewerMenuItem
+                key={x.id}
+                disabled={busy}
+                selected={photo.color_label === x.id}
+                onSelect={() =>
+                  change(`photos/${photo.id}/label/`, { label: x.id })
+                }
+              >
+                <span className="color-swatch" style={{ color: x.color }} />
+                <span>{x.name}</span>
+              </ViewerMenuItem>
             ))}
-        </select>
+          <ViewerMenuItem
+            disabled={busy}
+            selected={!photo.color_label}
+            onSelect={() => change(`photos/${photo.id}/label/`, { label: "" })}
+          >
+            <Circle strokeDasharray="2 3" />
+            <span>Not labeled</span>
+          </ViewerMenuItem>
+        </ViewerMenu>
       )}
       {allowed("comments") && (
-        <Button variant="ghost" onClick={onComment}>
+        <Button className="review-pill" variant="ghost" onClick={onComment}>
           <MessageCircle size={17} />
           Comment
         </Button>
       )}
       {allowed("comments") && allowed("annotations") && (
-        <Button variant="ghost" aria-pressed={drawing} onClick={onDraw}>
+        <Button
+          className="review-pill"
+          variant="ghost"
+          aria-pressed={drawing}
+          onClick={onDraw}
+        >
           <Pencil size={17} />
           Draw
         </Button>
       )}
-      {allowed("file_information") && (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="File information"
-          onClick={() => setInfo(true)}
-        >
-          <Info size={18} />
-        </Button>
-      )}
-      {allowed("download") && (
-        <a
-          className="icon-link"
-          aria-label="Download review copy"
-          href={`/api/v1/versions/${version.id}/download/`}
-        >
-          <Download size={18} />
-        </a>
-      )}
-      {user.is_staff && (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Gallery settings"
-          onClick={() => setSettings(true)}
-        >
-          <SlidersHorizontal size={19} />
-        </Button>
-      )}
+      <ViewerMenu label="Viewer options" trigger={<SlidersHorizontal />}>
+        <ViewerMenuItem onSelect={onPanel}>
+          <PanelRight />
+          <span>{panel ? "Hide feedback" : "Show feedback"}</span>
+        </ViewerMenuItem>
+        {photo.versions.length > 1 && (
+          <ViewerMenuItem onSelect={onCompare}>
+            <Columns2 />
+            <span>{compare ? "Close comparison" : "Compare versions"}</span>
+          </ViewerMenuItem>
+        )}
+        {allowed("file_information") && (
+          <ViewerMenuItem onSelect={() => setInfo(true)}>
+            <Info />
+            <span>File information</span>
+          </ViewerMenuItem>
+        )}
+        {allowed("download") && (
+          <ViewerMenuItem
+            onSelect={() => {
+              window.location.href = `/api/v1/versions/${version.id}/download/`;
+            }}
+          >
+            <Download />
+            <span>Download review copy</span>
+          </ViewerMenuItem>
+        )}
+        {user.is_staff && (
+          <ViewerMenuItem onSelect={() => setSettings(true)}>
+            <SlidersHorizontal />
+            <span>Gallery settings</span>
+          </ViewerMenuItem>
+        )}
+      </ViewerMenu>
       {error && <ErrorNotice error={error} />}
       {user.is_staff && (
         <GallerySettings

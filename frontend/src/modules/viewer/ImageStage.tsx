@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import type { Comment } from "@/api/types";
 import type { Annotation } from "@/modules/review/types";
 import {
   AnnotationLayer,
@@ -14,7 +16,17 @@ export function ImageStage({
   tool = null,
   color = "#ffcc45",
   onChange = () => {},
+  threads = [],
+  activeThread = null,
+  onThread = () => {},
+  composer = null,
+  anchor = null,
 }: {
+  threads?: Comment[];
+  activeThread?: string | null;
+  onThread?: (id: string) => void;
+  composer?: ReactNode;
+  anchor?: [number, number] | null;
   src: string;
   label: string;
   saved?: Annotation[];
@@ -44,6 +56,18 @@ export function ImageStage({
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(
     null,
   );
+  const position = (point: [number, number]) => ({
+    x: box.width / 2 + (point[0] - 0.5) * width * zoom + pan.x,
+    y: box.height / 2 + (((point[1] - 0.5) * width) / ratio) * zoom + pan.y,
+  });
+  const at = anchor ? position(anchor) : null;
+  const cardWidth = Math.min(410, Math.max(220, box.width - 24));
+  const left = at
+    ? Math.max(12, Math.min(box.width - cardWidth - 12, at.x + 24))
+    : 12;
+  const top = at
+    ? Math.max(12, Math.min(Math.max(12, box.height - 280), at.y - 16))
+    : 12;
   return (
     <div className="stage-wrapper">
       <div className="zoom-toolbar">
@@ -85,7 +109,12 @@ export function ImageStage({
         ref={container}
         className={`image-stage ${zoom > 1 ? "is-zoomed" : ""}`}
         onPointerDown={(e) => {
-          if (zoom <= 1 || tool) return;
+          if (
+            zoom <= 1 ||
+            tool ||
+            (e.target as HTMLElement).closest("button,textarea,.anchor-card")
+          )
+            return;
           drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
           e.currentTarget.setPointerCapture(e.pointerId);
         }}
@@ -130,6 +159,54 @@ export function ImageStage({
             onChange={onChange}
           />
         </div>
+        {threads.map((c, i) => {
+          const point = c.annotations.at(-1)?.points.at(-1);
+          if (!point) return null;
+          const p = position(point);
+          return (
+            <button
+              className="annotation-marker"
+              key={c.id}
+              aria-label={`Open photo comment ${i + 1}`}
+              aria-pressed={activeThread === c.id}
+              onClick={() => onThread(c.id)}
+              style={{ left: p.x, top: p.y }}
+            >
+              {(c.author.first_name || c.author.username)
+                .slice(0, 2)
+                .toUpperCase()}
+            </button>
+          );
+        })}
+        {draft.length > 0 &&
+          (() => {
+            const point = draft.at(-1)?.points.at(-1);
+            if (!point) return null;
+            const p = position(point);
+            return (
+              <button
+                className="annotation-marker draft-marker"
+                aria-label="Resume draft comment"
+                onClick={() => onThread("draft")}
+                style={{ left: p.x, top: p.y }}
+              >
+                You
+              </button>
+            );
+          })()}
+        {composer && at && (
+          <div
+            className="anchor-position"
+            style={{
+              left,
+              top,
+              width: cardWidth,
+              maxHeight: Math.max(140, box.height - top - 12),
+            }}
+          >
+            {composer}
+          </div>
+        )}
       </div>
     </div>
   );
