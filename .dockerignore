@@ -1,0 +1,12 @@
+.venv
+.git
+data
+artifacts
+__pycache__
+*.pyc
+.env
+deploy
+tests
+.playwright-cli
+
+output/
