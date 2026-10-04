@@ -1,7 +1,7 @@
-# Viewer redesign — staging review
+# Viewer redesign — approved and deployed
 
-Application candidate: `d5a5220678e9`. Production remains `dc89b3fe6525`.
-The agreed workflow is visual review in staging before production promotion.
+Deployed application: `d5a5220678e9`. Previous release: `dc89b3fe6525`.
+The user approved the staging visuals on 5 October 2026 before promotion.
 
 ## Design
 
@@ -57,3 +57,18 @@ After visual approval, rerun the release gate and promote the exact staged image
 with the existing backup/audit procedure. The source has been committed in separate
 implementation, repair and styling milestones. No production cutover was performed
 for this staging review.
+
+
+## Production verification — 5 October 2026
+
+The exact approved staging image was promoted. No database migrations were needed.
+The promotion audit matched original customer records and proof bytes before and
+ after cutover. Public HTTPS health, the application shell and script assets passed;
+anonymous gallery API access remained denied. The existing nine passing staging
+browser journeys cover the signed-in interaction changes.
+
+Release record: `20261004T232726Z` (UTC identifier). Previous image is retained for
+rollback. Post-release encrypted backup `photo-scanaki-20261004T232730Z.tar.gz.age`
+was copied off-host, decrypted successfully and its SQLite integrity verified
+(206 photos). Idle memory observed: approximately 93 MiB of the 768 MiB limit.
+Staging was stopped after promotion. No shared routing or unrelated services changed.
