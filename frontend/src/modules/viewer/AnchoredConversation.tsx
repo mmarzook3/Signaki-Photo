@@ -1,3 +1,5 @@
+import type {Annotation} from "@/modules/review/types";
+const EMPTY_SHAPES:Annotation[]=[];
 import { useRef, useState } from "react";
 import { X, CheckCheck, CornerDownRight } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,7 +29,7 @@ export function AnchoredConversation({
   const key = thread ? `${version.id}:reply:${thread.id}` : version.id;
   const draft = useDrafts((s) => s.values[key] || "");
   const setDraft = useDrafts((s) => s.set);
-  const shapes = useDrafts((s) => s.shapes[version.id] || []);
+  const shapes = useDrafts((s) => s.shapes[version.id] || EMPTY_SHAPES);
   const setShapes = useDrafts((s) => s.setShapes);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

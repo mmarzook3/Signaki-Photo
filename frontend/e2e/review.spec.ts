@@ -44,9 +44,12 @@ test("customer review journey preserves room, version and draft state", async ({
     .click();
   await page.locator(".photo-card").first().click();
   await expect(page.locator(".viewer-position")).toHaveText(/1 \/ /);
-  await page.getByRole("button", { name: "Compare", exact: true }).click();
+  await page.getByRole("button",{name:"Show feedback",exact:true}).click();
+  await page.getByRole("button",{name:"Viewer options"}).click();
+  await page.getByRole("menuitem", { name: "Compare versions", exact: true }).click();
   await expect(page.locator(".image-stage")).toHaveCount(2);
-  await page.getByRole("button", { name: "Close comparison" }).click();
+  await page.getByRole("button",{name:"Viewer options"}).click();
+  await page.getByRole("menuitem", { name: "Close comparison" }).click();
   await page.getByLabel(/Comment on version/).fill(draft);
   await page.getByRole("button", { name: "Next photograph" }).click();
   await page.getByRole("button", { name: "Previous photograph" }).click();
@@ -87,6 +90,7 @@ test("mobile gallery and viewer remain usable without page overflow", async ({
   await page.goto(`/app/properties/${qa.property}`);
   await page.locator(".photo-card").first().click();
   await expect(page.locator(".image-stage img")).toBeVisible();
+  await page.getByRole("button",{name:"Show feedback",exact:true}).click();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -122,6 +126,7 @@ test("admin can manage delivery, upload, replace and resolve feedback", async ({
     page.getByRole("link", { name: "High-quality photos" }),
   ).toBeVisible();
   await page.locator(".photo-card").first().click();
+  await page.getByRole("button",{name:"Show feedback",exact:true}).click();
   await page
     .getByRole("button", { name: "Photo settings", exact: true })
     .click();
