@@ -8,7 +8,7 @@ def validate_annotations(value):
     for shape in value:
         if not isinstance(shape, dict) or set(shape) != {'kind', 'points', 'color'}:
             raise ValidationError('Invalid annotation.')
-        if shape['kind'] not in {'pin', 'pen', 'rectangle', 'ellipse', 'arrow'} or shape['color'] not in {'#ffcc45', '#ff7185', '#70b7ff'}:
+        if shape['kind'] not in {'pin', 'pen', 'rectangle', 'ellipse', 'arrow'} or shape['color'] not in {'#ffcc45', '#ff7185', '#70b7ff', '#4f5bff', '#58c99a', '#f2c94c', '#f2594b'}:
             raise ValidationError('Invalid annotation tool or colour.')
         points = shape['points']
         expected = 1 if shape['kind'] == 'pin' else 2

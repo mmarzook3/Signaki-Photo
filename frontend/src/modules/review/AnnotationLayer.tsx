@@ -77,7 +77,7 @@ function Shape({ shape: s, index }: { shape: Annotation; index: number }) {
   const [x2, y2] = (s.points.at(-1) || s.points[0]).map((v) => v * 1000);
   const attrs = {
     stroke: s.color,
-    strokeWidth: 3,
+    strokeWidth: 4,
     fill: "none",
     vectorEffect: "non-scaling-stroke" as const,
   };

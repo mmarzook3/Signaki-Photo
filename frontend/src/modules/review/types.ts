@@ -1,6 +1,6 @@
 export type Annotation = {
   kind: "pin" | "pen" | "rectangle" | "ellipse" | "arrow";
-  color: "#ffcc45" | "#ff7185" | "#70b7ff";
+  color: "#ffcc45" | "#ff7185" | "#70b7ff" | "#4f5bff" | "#58c99a" | "#f2c94c" | "#f2594b";
   points: [number, number][];
 };
 export type Label = {

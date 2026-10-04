@@ -44,7 +44,7 @@ export function Viewer() {
   const navigate = useNavigate();
   const user = useUser();
   const [tool, setTool] = useState<DrawTool>(null);
-  const [color, setColor] = useState<Annotation["color"]>("#70b7ff");
+  const [color, setColor] = useState<Annotation["color"]>("#4f5bff");
   const shapes = useDrafts((s) => s.shapes);
   const setShapes = useDrafts((s) => s.setShapes);
   const [panel, setPanel] = useState(false);

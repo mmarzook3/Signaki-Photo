@@ -18,9 +18,10 @@ const tools = [
   ["pin", "Pin", MapPin],
 ] as const;
 const colors = [
-  ["#70b7ff", "Blue"],
-  ["#ffcc45", "Yellow"],
-  ["#ff7185", "Pink"],
+  ["#4f5bff", "Blue"],
+  ["#58c99a", "Green"],
+  ["#f2c94c", "Yellow"],
+  ["#f2594b", "Red"],
 ] as const;
 export function DrawingToolbar({
   tool,
