@@ -31,6 +31,7 @@ export function AnnotationLayer({
       preserveAspectRatio="none"
       onPointerDown={(e) => {
         if (!tool || draft.length >= 8) return;
+        e.preventDefault();
         e.stopPropagation();
         e.currentTarget.setPointerCapture(e.pointerId);
         const p = point(e);

@@ -31,6 +31,7 @@ test("all drawing tools retain normalized coordinates when zoomed", async ({
   await page.locator(".photo-card").nth(1).click();
   await page.getByRole("button", { name: "Zoom in", exact: true }).click();
   await page.getByRole("button", { name: "Draw", exact: true }).click();
+  let drawn=0;
   for (const tool of ["pin", "pen", "rectangle", "ellipse", "arrow"]) {
     await page.getByLabel("Drawing tool", { exact: true }).selectOption(tool);
     const box = (await page
@@ -42,6 +43,8 @@ test("all drawing tools retain normalized coordinates when zoomed", async ({
       steps: 5,
     });
     await page.mouse.up();
+    drawn++;
+    await expect(page.getByText(`${drawn} annotation(s) ready to save.`)).toBeVisible();
   }
   await expect(page.getByText("5 annotation(s) ready to save.")).toBeVisible();
   await page.getByRole("button", { name: "Undo", exact: true }).click();
