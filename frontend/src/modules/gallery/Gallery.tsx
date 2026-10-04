@@ -1,3 +1,7 @@
+import { GalleryActivity } from "@/modules/review/GalleryActivity";
+import { GallerySettings } from "@/modules/review/GallerySettings";
+import { DecisionControl } from "@/modules/review/DecisionControl";
+import { can } from "@/modules/review/types";
 import {
   Link,
   useNavigate,
@@ -45,6 +49,9 @@ export function Gallery() {
   const search = useSearch({ strict: false }) as GallerySearch;
   const navigate = useNavigate();
   const user = useUser();
+  const [reviewSettings, setReviewSettings] = useState(false);
+  const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [labelFilter, setLabelFilter] = useState("");
   const [settings, setSettings] = useState(false);
   const [upload, setUpload] = useState(false);
   const [filters, setFilters] = useState(false);
@@ -67,8 +74,16 @@ export function Gallery() {
   if (result.isPending) return <Loading />;
   if (result.error) return <ErrorNotice error={message(result.error)} />;
   const { property, groups, photos } = result.data;
-  let shown = filterPhotos(photos, search.q || "", search.status || "all");
-  if (search.group)
+  const workflow = can(user.is_staff, property.review_settings, "workflow");
+  let shown = filterPhotos(
+    photos,
+    workflow ? search.q || "" : "",
+    workflow ? search.status || "all" : "all",
+  );
+  if (workflow && favoriteOnly) shown = shown.filter((p) => p.favorite);
+  if (workflow && labelFilter)
+    shown = shown.filter((p) => p.color_label === labelFilter);
+  if (workflow && search.group)
     shown = shown.filter((p) => String(p.group_id ?? "none") === search.group);
   const counts = Object.fromEntries(
     Object.keys(statuses).map((s) => [
@@ -123,6 +138,27 @@ export function Gallery() {
         </div>
         <div className="gallery-actions">
           <DeliveryLink property={property} />
+          {can(user.is_staff, property.review_settings, "gallery_status") && (
+            <GalleryActivity propertyId={property.id} />
+          )}
+          {!user.is_staff &&
+            can(false, property.review_settings, "gallery_status") && (
+              <DecisionControl
+                gallery
+                endpoint={`properties/${property.id}/decision/`}
+                revision={property.review_revision}
+                status={property.review_status}
+                choices={["approved", "review", "rejected", "in_progress"]}
+              />
+            )}
+          {!user.is_staff && can(false, property.review_settings, "upload") && (
+            <Button onClick={() => setUpload(true)}>Upload photos</Button>
+          )}
+          {user.is_staff && (
+            <Button variant="outline" onClick={() => setReviewSettings(true)}>
+              Gallery settings
+            </Button>
+          )}
           {user.is_staff && (
             <>
               <Button onClick={() => setUpload(true)}>
@@ -142,68 +178,97 @@ export function Gallery() {
         </div>
       </header>
       <div className="gallery-body">
-        <aside className={`filter-rail ${filters ? "show-mobile" : ""}`}>
-          <div className="review-summary">
-            <p className="nav-label">REVIEW PROGRESS</p>
-            <strong>
-              {reviewed}
-              <span> / {photos.length}</span>
-            </strong>
-            <progress value={reviewed} max={Math.max(photos.length, 1)} />
-            <p className="caption">photographs reviewed</p>
-          </div>
-          <p className="filter-title">Status</p>
-          <button
-            className={`filter-option ${!search.status || search.status === "all" ? "active" : ""}`}
-            onClick={() => update({ status: "all" })}
-          >
-            <Grid2X2 size={17} />
-            All photographs<span>{photos.length}</span>
-          </button>
-          {(Object.keys(statuses) as Status[]).map((s) => {
-            const Icon = {
-              approved: Check,
-              review: RefreshCw,
-              rejected: X,
-              pending: Circle,
-            }[s];
-            return (
-              <button
-                key={s}
-                className={`filter-option ${search.status === s ? "active" : ""}`}
-                onClick={() => update({ status: s })}
-              >
-                <Icon size={17} className={`text-${s}`} />
-                {statuses[s]}
-                <span>{counts[s]}</span>
-              </button>
-            );
-          })}
-          <hr />
-          <p className="filter-title">Rooms & locations</p>
-          <button
-            className={`filter-option ${!search.group ? "active" : ""}`}
-            onClick={() => update({ group: undefined })}
-          >
-            <Folder size={17} />
-            Every room
-          </button>
-          {groups.map((g) => (
+        {workflow && (
+          <aside className={`filter-rail ${filters ? "show-mobile" : ""}`}>
+            <div className="review-summary">
+              <p className="nav-label">REVIEW PROGRESS</p>
+              <strong>
+                {reviewed}
+                <span> / {photos.length}</span>
+              </strong>
+              <progress value={reviewed} max={Math.max(photos.length, 1)} />
+              <p className="caption">photographs reviewed</p>
+            </div>
+            <p className="filter-title">Status</p>
             <button
-              key={g.id}
-              className={`filter-option ${search.group === String(g.id) ? "active" : ""}`}
-              onClick={() => update({ group: String(g.id) })}
+              className={`filter-option ${!search.status || search.status === "all" ? "active" : ""}`}
+              onClick={() => update({ status: "all" })}
             >
-              <Folder size={15} />
-              <span className="room-name">{g.name}</span>
+              <Grid2X2 size={17} />
+              All photographs<span>{photos.length}</span>
             </button>
-          ))}
-          <p className="rail-note">
-            Watermarked previews.
-            <br />
-            Final photographs delivered separately.
-          </p>
-        </aside>
+            {(Object.keys(statuses) as Status[]).map((s) => {
+              const Icon = {
+                approved: Check,
+                review: RefreshCw,
+                rejected: X,
+                pending: Circle,
+                in_progress: Circle,
+              }[s];
+              return (
+                <button
+                  key={s}
+                  className={`filter-option ${search.status === s ? "active" : ""}`}
+                  onClick={() => update({ status: s })}
+                >
+                  <Icon size={17} className={`text-${s}`} />
+                  {statuses[s]}
+                  <span>{counts[s]}</span>
+                </button>
+              );
+            })}
+            {can(user.is_staff, property.review_settings, "favorites") && (
+              <label className="setting-row">
+                <span>Favorites only</span>
+                <input
+                  type="checkbox"
+                  checked={favoriteOnly}
+                  onChange={(e) => setFavoriteOnly(e.target.checked)}
+                />
+              </label>
+            )}
+            {can(user.is_staff, property.review_settings, "color_labels") && (
+              <select
+                aria-label="Filter color label"
+                value={labelFilter}
+                onChange={(e) => setLabelFilter(e.target.value)}
+              >
+                <option value="">All labels</option>
+                {property.review_settings.labels
+                  .filter((x) => x.enabled)
+                  .map((x) => (
+                    <option key={x.id} value={x.id}>
+                      {x.name}
+                    </option>
+                  ))}
+              </select>
+            )}
+            <hr />
+            <p className="filter-title">Rooms & locations</p>
+            <button
+              className={`filter-option ${!search.group ? "active" : ""}`}
+              onClick={() => update({ group: undefined })}
+            >
+              <Folder size={17} />
+              Every room
+            </button>
+            {groups.map((g) => (
+              <button
+                key={g.id}
+                className={`filter-option ${search.group === String(g.id) ? "active" : ""}`}
+                onClick={() => update({ group: String(g.id) })}
+              >
+                <Folder size={15} />
+                <span className="room-name">{g.name}</span>
+              </button>
+            ))}
+            <p className="rail-note">
+              Review previews.
+              <br />
+              Final photographs delivered separately.
+            </p>
+          </aside>
+        )}
         <main className={`gallery-canvas ${search.compact ? "compact" : ""}`}>
           <div className="gallery-toolbar">
             <Button
@@ -216,15 +281,17 @@ export function Gallery() {
             >
               <Filter size={17} />
             </Button>
-            <div className="search-field">
-              <Search size={16} />
-              <Input
-                aria-label="Search photographs"
-                placeholder="Search filenames…"
-                value={search.q || ""}
-                onChange={(e) => update({ q: e.target.value })}
-              />
-            </div>
+            {workflow && (
+              <div className="search-field">
+                <Search size={16} />
+                <Input
+                  aria-label="Search photographs"
+                  placeholder="Search filenames…"
+                  value={search.q || ""}
+                  onChange={(e) => update({ q: e.target.value })}
+                />
+              </div>
+            )}
             <span className="caption result-count" aria-live="polite">
               {shown.length} photographs
             </span>
@@ -306,12 +373,25 @@ export function Gallery() {
           )}
         </main>
       </div>
+      {!user.is_staff && can(false, property.review_settings, "upload") && (
+        <UploadDialog
+          propertyId={propertyId}
+          groups={groups}
+          open={upload}
+          onOpenChange={setUpload}
+        />
+      )}
       {user.is_staff && (
         <>
           <PropertyEditor
             property={property}
             open={settings}
             onOpenChange={setSettings}
+          />
+          <GallerySettings
+            property={property}
+            open={reviewSettings}
+            onOpenChange={setReviewSettings}
           />
           <UploadDialog
             propertyId={propertyId}
@@ -346,6 +426,13 @@ function PhotoCard({ photo, search }: { photo: Photo; search: GallerySearch }) {
       <div className="photo-caption">
         <strong title={photo.name}>{photo.name}</strong>
         {photo.hidden && <span>Hidden</span>}
+        {photo.favorite && <span aria-label="Favorite">&#9829;</span>}
+        {photo.color_label && (
+          <span
+            className={`label-dot label-${photo.color_label}`}
+            aria-label={`${photo.color_label} label`}
+          />
+        )}
       </div>
       <StatusBadge status={photo.latest.status} />
     </Link>

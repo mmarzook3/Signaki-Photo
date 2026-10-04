@@ -1,3 +1,4 @@
+import type { ReviewSettings, Annotation } from "@/modules/review/types";
 import type { components } from "./generated";
 // DRF emits all declared output fields; OpenAPI optional flags also describe input defaults.
 type Output<T> = T extends (infer U)[]
@@ -6,16 +7,31 @@ type Output<T> = T extends (infer U)[]
     ? { [K in keyof T]-?: Output<Exclude<T[K], undefined>> }
     : T;
 type Schema = components["schemas"];
-export type Status = Schema["StatusEnum"];
+export type Status = Schema["StatusEnum"] | "in_progress";
 export type User = Output<Schema["User"]>;
 export type Session = Output<Schema["SessionResponse"]>;
-export type Version = Output<Schema["Version"]>;
-export type Property = Output<Schema["Property"]>;
+export type Version = Omit<Output<Schema["Version"]>, "status"> & {
+  status: Status;
+};
+export type Property = Output<Schema["Property"]> & {
+  review_settings: ReviewSettings;
+  review_status: Status;
+  review_revision: number;
+  watermark_locked: boolean;
+};
 export type Group = Output<Schema["Group"]>;
-export type Photo = Output<Schema["Photo"]>;
-export type Comment = Output<Schema["Comment"]>;
-export type Gallery = Output<Schema["GalleryResponse"]>;
-export type PhotoDetail = Output<Schema["PhotoResponse"]>;
+export type Photo = Omit<Output<Schema["Photo"]>, "latest" | "versions"> & {
+  favorite: boolean;
+  color_label: string;
+  latest: Version | null;
+  versions: Version[];
+};
+export type Comment = Output<Schema["Comment"]> & {
+  annotations: Annotation[];
+  parent: string | null;
+};
+export type Gallery = { property: Property; groups: Group[]; photos: Photo[] };
+export type PhotoDetail = { photo: Photo; comments: Comment[] };
 export type FeedbackPage = Output<Schema["FeedbackResponse"]>;
 export interface UploadResult {
   items: { name: string; ok: boolean; error?: string; id?: string }[];

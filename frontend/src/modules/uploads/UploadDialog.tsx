@@ -1,3 +1,4 @@
+import { useUser } from "@/modules/session/Session";
 import { lazy, Suspense, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UploadCloud, Plus } from "lucide-react";
@@ -25,6 +26,7 @@ export function UploadDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const user = useUser();
   const query = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
   const [group, setGroup] = useState("");
@@ -63,35 +65,37 @@ export function UploadDialog({
               ))}
             </select>
           </label>
-          <div className="inline-form">
-            <Input
-              aria-label="New room name"
-              placeholder="New room name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-            />
-            <Button
-              variant="outline"
-              disabled={!groupName.trim() || busy}
-              onClick={async () => {
-                setError("");
-                try {
-                  const g = await write<Group>(
-                    `properties/${propertyId}/groups/`,
-                    { name: groupName, position: groups.length },
-                  );
-                  setGroup(String(g.id));
-                  setGroupName("");
-                  await refresh();
-                } catch (err) {
-                  setError(message(err));
-                }
-              }}
-            >
-              <Plus size={16} />
-              Add room
-            </Button>
-          </div>
+          {user.is_staff && (
+            <div className="inline-form">
+              <Input
+                aria-label="New room name"
+                placeholder="New room name"
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+              />
+              <Button
+                variant="outline"
+                disabled={!groupName.trim() || busy}
+                onClick={async () => {
+                  setError("");
+                  try {
+                    const g = await write<Group>(
+                      `properties/${propertyId}/groups/`,
+                      { name: groupName, position: groups.length },
+                    );
+                    setGroup(String(g.id));
+                    setGroupName("");
+                    await refresh();
+                  } catch (err) {
+                    setError(message(err));
+                  }
+                }}
+              >
+                <Plus size={16} />
+                Add room
+              </Button>
+            </div>
+          )}
           <label
             className="upload-zone"
             onDragOver={(e) => e.preventDefault()}

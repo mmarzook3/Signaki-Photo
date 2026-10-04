@@ -1,5 +1,6 @@
 import type { Photo, Status } from "@/api/types";
 export const statuses: Record<Status, string> = {
+  in_progress: "In progress",
   pending: "Awaiting review",
   approved: "Approved",
   rejected: "Rejected",

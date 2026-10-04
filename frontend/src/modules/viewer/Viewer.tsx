@@ -1,3 +1,8 @@
+import { ReviewTools } from "@/modules/review/ReviewTools";
+import type { Annotation } from "@/modules/review/types";
+import type { DrawTool } from "@/modules/review/AnnotationLayer";
+import { can } from "@/modules/review/types";
+const NO_SHAPES: Annotation[] = [];
 import { useEffect, useRef, useState } from "react";
 import {
   Link,
@@ -35,6 +40,10 @@ export function Viewer() {
   };
   const navigate = useNavigate();
   const user = useUser();
+  const [tool, setTool] = useState<DrawTool>(null);
+  const [color, setColor] = useState<Annotation["color"]>("#ffcc45");
+  const shapes = useDrafts((s) => s.shapes);
+  const setShapes = useDrafts((s) => s.setShapes);
   const [panel, setPanel] = useState(true);
   const [compare, setCompare] = useState(false);
   const [comparison, setComparison] = useState("");
@@ -55,14 +64,14 @@ export function Viewer() {
   );
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      if (draftCount) {
+      if (draftCount || Object.values(shapes).some((s) => s.length)) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [draftCount]);
+  }, [draftCount, shapes]);
   const photo = details.data?.photo;
   const selected =
     photo?.versions.find((v) => v.id === search.version) || photo?.latest;
@@ -78,6 +87,7 @@ export function Viewer() {
   const previous = items[index - 1];
   const next = items[index + 1];
   function move(id: string) {
+    setTool(null);
     setCompare(false);
     setComparison("");
     navigate({
@@ -230,6 +240,32 @@ export function Viewer() {
                 key={`${selected.id}-${compare}`}
                 src={selected.image_url}
                 label={selected.label}
+                saved={
+                  can(
+                    user.is_staff,
+                    gallery.data.property.review_settings,
+                    "annotations",
+                  )
+                    ? details.data.comments
+                        .filter((c) => c.version_id === selected.id)
+                        .flatMap((c) => c.annotations)
+                    : NO_SHAPES
+                }
+                draft={shapes[selected.id] || NO_SHAPES}
+                tool={
+                  can(
+                    user.is_staff,
+                    gallery.data.property.review_settings,
+                    "annotations",
+                  )
+                    ? tool
+                    : null
+                }
+                color={color}
+                onChange={(s) => {
+                  setShapes(selected.id, s);
+                  setPanel(true);
+                }}
               />
             </div>
             {compare && other && (
@@ -279,22 +315,95 @@ export function Viewer() {
                 </button>
               ))}
             </nav>
-            <div className="viewer-controls">
-              <label className="version-control">
-                <span className="sr-only">View version</span>
+            {tool && (
+              <div className="drawing-toolbar" aria-label="Drawing tools">
                 <select
-                  aria-label="View version"
-                  value={selected.id}
-                  onChange={(e) => versionChange(e.target.value)}
+                  aria-label="Drawing tool"
+                  value={tool}
+                  onChange={(e) => setTool(e.target.value as DrawTool)}
                 >
-                  {photo.versions.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      Version {v.number}
-                      {v.id === photo.latest?.id ? " · Latest" : ""}
+                  {["pin", "pen", "rectangle", "ellipse", "arrow"].map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
-              </label>
+                <select
+                  aria-label="Drawing color"
+                  value={color}
+                  onChange={(e) =>
+                    setColor(e.target.value as Annotation["color"])
+                  }
+                >
+                  <option value="#ffcc45">Yellow</option>
+                  <option value="#ff7185">Pink</option>
+                  <option value="#70b7ff">Blue</option>
+                </select>
+                <Button
+                  variant="ghost"
+                  disabled={!shapes[selected.id]?.length}
+                  onClick={() =>
+                    setShapes(
+                      selected.id,
+                      (shapes[selected.id] || []).slice(0, -1),
+                    )
+                  }
+                >
+                  Undo
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setShapes(selected.id, [])}
+                >
+                  Clear draft
+                </Button>
+                <Button variant="ghost" onClick={() => setTool(null)}>
+                  Done drawing
+                </Button>
+                <span className="caption">
+                  Add a comment to save your marks.
+                </span>
+              </div>
+            )}
+            <div className="viewer-controls">
+              <ReviewTools
+                photo={photo}
+                property={gallery.data.property}
+                version={selected}
+                drawing={Boolean(tool)}
+                onComment={() => {
+                  setPanel(true);
+                  setTimeout(
+                    () => document.getElementById("new-comment")?.focus(),
+                    0,
+                  );
+                }}
+                onDraw={() => {
+                  setTool(tool ? null : "pen");
+                  setPanel(true);
+                }}
+              />
+              {can(
+                user.is_staff,
+                gallery.data.property.review_settings,
+                "versioning",
+              ) && (
+                <label className="version-control">
+                  <span className="sr-only">View version</span>
+                  <select
+                    aria-label="View version"
+                    value={selected.id}
+                    onChange={(e) => versionChange(e.target.value)}
+                  >
+                    {photo.versions.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        Version {v.number}
+                        {v.id === photo.latest?.id ? " · Latest" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {photo.versions.length > 1 && (
                 <Button
                   variant="ghost"
@@ -331,6 +440,7 @@ export function Viewer() {
               version={selected}
               comments={details.data.comments}
               onVersion={versionChange}
+              settings={gallery.data.property.review_settings}
             />
           </aside>
         )}

@@ -1,3 +1,4 @@
+import { can, type ReviewSettings } from "@/modules/review/types";
 import { useRef, useState } from "react";
 import { Check, X, RefreshCw, MessageSquare, CircleCheck } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,7 +21,9 @@ export function FeedbackPanel({
   version,
   comments,
   onVersion,
+  settings,
 }: {
+  settings?: ReviewSettings;
   photo: Photo;
   version: Version;
   comments: Comment[];
@@ -28,6 +31,12 @@ export function FeedbackPanel({
 }) {
   const user = useUser();
   const query = useQueryClient();
+  const commentsAllowed = !settings || can(user.is_staff, settings, "comments");
+  const statusesAllowed =
+    !settings || can(user.is_staff, settings, "asset_status");
+  const shapes = useDrafts((s) => s.shapes[version.id]);
+  const setShapes = useDrafts((s) => s.setShapes);
+  const [reply, setReply] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -79,20 +88,26 @@ export function FeedbackPanel({
       </div>
       <div className="decision-block">
         <StatusBadge status={version.status} />
-        {!user.is_staff && (
+        {!user.is_staff && statusesAllowed && (
           <>
             <div className="decision-actions">
               <Button
                 disabled={busy}
                 variant="outline"
                 className="approve-button"
+                hidden={
+                  settings && !settings.allowed_statuses.includes("approved")
+                }
                 onClick={() => decide("approved")}
               >
                 <Check size={15} />
                 Approve
               </Button>
               <Button
-                disabled={busy}
+                disabled={
+                  busy ||
+                  (settings && !settings.allowed_statuses.includes("rejected"))
+                }
                 variant="outline"
                 onClick={() => {
                   setDecision("rejected");
@@ -104,7 +119,10 @@ export function FeedbackPanel({
                 Reject
               </Button>
               <Button
-                disabled={busy}
+                disabled={
+                  busy ||
+                  (settings && !settings.allowed_statuses.includes("review"))
+                }
                 variant="outline"
                 onClick={() => {
                   setDecision("review");
@@ -140,7 +158,7 @@ export function FeedbackPanel({
           comments.map((c) => (
             <article
               key={c.id}
-              className={`comment ${c.resolved ? "is-resolved" : ""}`}
+              className={`comment ${c.parent ? "is-reply" : ""} ${c.resolved ? "is-resolved" : ""}`}
             >
               <div className="comment-top">
                 <span className="avatar">
@@ -166,6 +184,22 @@ export function FeedbackPanel({
                 <StatusBadge status={c.decision as Version["status"]} />
               )}
               <p>{c.text}</p>
+              {c.annotations?.length > 0 && (
+                <span className="caption">
+                  {c.annotations.length} annotation(s) � v{c.version_number}
+                </span>
+              )}
+              {commentsAllowed && c.version_id === version.id && (
+                <button
+                  className="text-action"
+                  onClick={() => {
+                    setReply(c.parent || c.id);
+                    document.getElementById("new-comment")?.focus();
+                  }}
+                >
+                  Reply
+                </button>
+              )}
               {c.resolved && (
                 <span className="caption">
                   <CircleCheck size={13} />
@@ -203,46 +237,65 @@ export function FeedbackPanel({
           </div>
         )}
       </div>
-      <form
-        className="comment-composer"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (!draft.trim()) return;
-          setBusy(true);
-          setError("");
-          setNotice("");
-          try {
-            await write(`versions/${version.id}/comments/`, {
-              text: draft,
-              request_id: commentKey.current,
-            });
-            setDraft(version.id, "");
-            commentKey.current = crypto.randomUUID();
-            await refresh();
-            setNotice(`Comment saved on version ${version.number}.`);
-          } catch (err) {
-            setError(message(err));
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        <label htmlFor="new-comment">Comment on version {version.number}</label>
-        <Textarea
-          id="new-comment"
-          value={draft}
-          onChange={(e) => {
-            setDraft(version.id, e.target.value);
-            commentKey.current = crypto.randomUUID();
+      {commentsAllowed && (
+        <form
+          className="comment-composer"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!draft.trim()) return;
+            setBusy(true);
+            setError("");
+            setNotice("");
+            try {
+              await write(`versions/${version.id}/comments/`, {
+                text: draft,
+                annotations: shapes || [],
+                parent_id: reply,
+                request_id: commentKey.current,
+              });
+              setDraft(version.id, "");
+              setShapes(version.id, []);
+              setReply(null);
+              commentKey.current = crypto.randomUUID();
+              await refresh();
+              setNotice(`Comment saved on version ${version.number}.`);
+            } catch (err) {
+              setError(message(err));
+            } finally {
+              setBusy(false);
+            }
           }}
-          maxLength={4000}
-          placeholder="What would you like us to know?"
-          required
-        />
-        <Button disabled={busy || !draft.trim()} type="submit">
-          {busy ? "Saving…" : "Send comment"}
-        </Button>
-      </form>
+        >
+          {reply && (
+            <p>
+              Replying to a comment{" "}
+              <button type="button" onClick={() => setReply(null)}>
+                Cancel reply
+              </button>
+            </p>
+          )}
+          {Boolean(shapes?.length) && (
+            <p>{shapes?.length} annotation(s) ready to save.</p>
+          )}
+          <label htmlFor="new-comment">
+            Comment on version {version.number}
+          </label>
+          <Textarea
+            id="new-comment"
+            value={draft}
+            onChange={(e) => {
+              setDraft(version.id, e.target.value);
+              commentKey.current = crypto.randomUUID();
+            }}
+            maxLength={4000}
+            placeholder="What would you like us to know?"
+            required
+          />
+          <Button disabled={busy || !draft.trim()} type="submit">
+            {busy ? "Saving…" : "Send comment"}
+          </Button>
+        </form>
+      )}
       <Dialog
         open={Boolean(decision)}
         onOpenChange={(open) => {

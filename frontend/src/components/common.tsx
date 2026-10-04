@@ -7,6 +7,7 @@ export function StatusBadge({ status }: { status: Status }) {
     approved: Check,
     rejected: X,
     review: RefreshCw,
+    in_progress: Circle,
     pending: Circle,
   }[status];
   return (
