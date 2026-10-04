@@ -9,7 +9,7 @@ class AccessHeaders:
      return JsonResponse({'detail':'Choose a new password.','code':'password_required'},status=403)
     if not request.path.startswith('/app'):return redirect('password')
   response=self.get_response(request)
-  response['Content-Security-Policy']="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+  response['Content-Security-Policy']="default-src 'self'; img-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
   response['Permissions-Policy']='camera=(), microphone=(), geolocation=()'
   response['X-Robots-Tag']='noindex, nofollow, noarchive'
   if not request.path.startswith('/static/'):response['Cache-Control']='private, no-store'

@@ -10,7 +10,7 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,6 +21,8 @@ from proofs.views import properties, photos, add_version, login_view
 from .serializers import (
     UserSerializer, PropertySerializer, GroupSerializer, PhotoSerializer,
     VersionSerializer, CommentSerializer, DecisionInput, CommentInput,
+    SessionResponse, GalleryResponse, PhotoResponse, FeedbackResponse,
+    LoginInput, PasswordInput, PropertyInput, PhotoInput, CustomerInput, CustomerUpdateInput, ResolveInput, UploadInput, ReplacementInput,
 )
 
 
@@ -42,7 +44,9 @@ def property_queryset(request):
 
 
 @method_decorator(csrf_protect, name='dispatch')
+@extend_schema_view(get=extend_schema(responses=SessionResponse), post=extend_schema(responses=SessionResponse), delete=extend_schema(responses={200: {"type": "object"}}))
 class Session(APIView):
+    serializer_class = LoginInput
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -68,7 +72,9 @@ class Session(APIView):
         return Response({'ok': True})
 
 
+@extend_schema_view(post=extend_schema(responses={200: {"type": "object"}}))
 class Password(APIView):
+    serializer_class = PasswordInput
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -82,6 +88,7 @@ class Password(APIView):
 
 
 class Properties(APIView):
+    serializer_class = PropertyInput
     permission_classes = [IsAuthenticated]
 
     @extend_schema(responses=PropertySerializer(many=True))
@@ -94,7 +101,9 @@ class Properties(APIView):
         return Response({'id': str(obj.pk)}, status=201)
 
 
+@extend_schema_view(get=extend_schema(responses=GalleryResponse), patch=extend_schema(responses={200: {"type": "object"}}))
 class PropertyDetail(APIView):
+    serializer_class = PropertyInput
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -116,7 +125,9 @@ class PropertyDetail(APIView):
         return Response({'ok': True})
 
 
+@extend_schema_view(post=extend_schema(responses=GroupSerializer))
 class Groups(APIView):
+    serializer_class = GroupSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -133,7 +144,9 @@ class Groups(APIView):
         return Response(GroupSerializer(group).data, status=201)
 
 
+@extend_schema_view(get=extend_schema(responses=PhotoResponse), patch=extend_schema(responses={200: {"type": "object"}}))
 class PhotoDetail(APIView):
+    serializer_class = PhotoInput
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -192,7 +205,9 @@ class Comments(APIView):
         return Response(CommentSerializer(comment).data, status=201 if created else 200)
 
 
+@extend_schema_view(post=extend_schema(responses={200: {"type": "object"}}))
 class Resolve(APIView):
+    serializer_class = ResolveInput
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -205,6 +220,7 @@ class Resolve(APIView):
         return Response({'ok': True})
 
 
+@extend_schema_view(get=extend_schema(responses=FeedbackResponse))
 class Feedback(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -218,7 +234,9 @@ class Feedback(APIView):
         return Response({'items': CommentSerializer(page, many=True).data, 'page': page.number, 'pages': page.paginator.num_pages, 'count': page.paginator.count})
 
 
+@extend_schema_view(get=extend_schema(responses=UserSerializer(many=True)), post=extend_schema(responses=UserSerializer))
 class Customers(APIView):
+    serializer_class = CustomerInput
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -233,7 +251,9 @@ class Customers(APIView):
         return Response(UserSerializer(user).data, status=201)
 
 
+@extend_schema_view(patch=extend_schema(responses=UserSerializer))
 class CustomerDetail(APIView):
+    serializer_class = CustomerUpdateInput
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
@@ -255,13 +275,21 @@ class CustomerDetail(APIView):
         return Response(UserSerializer(user).data)
 
 
+@extend_schema_view(post=extend_schema(responses={200: {"type": "object"}}))
 class Upload(APIView):
+    serializer_class = UploadInput
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
         staff(request)
         prop = get_object_or_404(Property, pk=pk)
-        group = get_object_or_404(Group, pk=request.data['group'], property=prop) if request.data.get('group') else None
+        group = None
+        if request.data.get('group'):
+            try:
+                group_id = int(request.data['group'])
+            except (ValueError, TypeError):
+                raise ValidationError({'group': 'Choose a valid room.'})
+            group = get_object_or_404(Group, pk=group_id, property=prop)
         files = request.FILES.getlist('photos')
         if not 1 <= len(files) <= 10 or sum(f.size for f in files) > 64 * 1024 * 1024:
             raise ValidationError('Choose 1–10 photos, totalling no more than 64 MB.')
@@ -283,7 +311,9 @@ class Upload(APIView):
         return Response({'items': result})
 
 
+@extend_schema_view(post=extend_schema(responses=VersionSerializer))
 class Replacement(APIView):
+    serializer_class = ReplacementInput
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):

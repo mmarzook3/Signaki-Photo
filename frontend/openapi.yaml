@@ -1,0 +1,1176 @@
+openapi: 3.0.3
+info:
+  title: Signaki API
+  version: 1.0.0
+paths:
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/comments/{id}/resolve/:
+    post:
+      operationId: v1_comments_resolve_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResolveInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResolveInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/customers/:
+    get:
+      operationId: v1_customers_list
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: v1_customers_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/customers/{id}/:
+    patch:
+      operationId: v1_customers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerUpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerUpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerUpdateInput'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/feedback/:
+    get:
+      operationId: v1_feedback_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+          description: ''
+  /api/v1/password/:
+    post:
+      operationId: v1_password_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/photos/{id}/:
+    get:
+      operationId: v1_photos_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResponse'
+          description: ''
+    patch:
+      operationId: v1_photos_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPhotoInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPhotoInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPhotoInput'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/photos/{id}/versions/:
+    post:
+      operationId: v1_photos_versions_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplacementInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReplacementInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReplacementInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/v1/properties/:
+    get:
+      operationId: v1_properties_list
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Property'
+          description: ''
+    post:
+      operationId: v1_properties_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PropertyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PropertyInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyInput'
+          description: ''
+  /api/v1/properties/{id}/:
+    get:
+      operationId: v1_properties_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryResponse'
+          description: ''
+    patch:
+      operationId: v1_properties_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyInput'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/properties/{id}/groups/:
+    post:
+      operationId: v1_properties_groups_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Group'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: ''
+  /api/v1/properties/{id}/upload/:
+    post:
+      operationId: v1_properties_upload_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/session/:
+    get:
+      operationId: v1_session_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+          description: ''
+    post:
+      operationId: v1_session_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+          description: ''
+    delete:
+      operationId: v1_session_destroy
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/versions/{id}/comments/:
+    post:
+      operationId: v1_versions_comments_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/v1/versions/{id}/decision/:
+    post:
+      operationId: v1_versions_decision_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+components:
+  schemas:
+    BlankEnum:
+      enum:
+      - ''
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version_id:
+          type: string
+          format: uuid
+          readOnly: true
+        version_number:
+          type: integer
+          readOnly: true
+        photo_id:
+          type: string
+          format: uuid
+          readOnly: true
+        photo_name:
+          type: string
+          readOnly: true
+        property_name:
+          type: string
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        text:
+          type: string
+          maxLength: 4000
+        decision:
+          oneOf:
+          - $ref: '#/components/schemas/CommentDecisionEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        resolved:
+          type: boolean
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - created
+      - id
+      - photo_id
+      - photo_name
+      - property_name
+      - text
+      - version_id
+      - version_number
+    CommentDecisionEnum:
+      enum:
+      - approved
+      - rejected
+      - review
+      type: string
+      description: |-
+        * `approved` - Approved
+        * `rejected` - Rejected — not needed
+        * `review` - Review — changes needed
+    CommentInput:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 4000
+        request_id:
+          type: string
+          format: uuid
+      required:
+      - request_id
+      - text
+    CustomerInput:
+      type: object
+      properties:
+        username:
+          type: string
+        first_name:
+          type: string
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 12
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 12
+      required:
+      - password1
+      - password2
+      - username
+    DecisionInput:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/DecisionInputDecisionEnum'
+        text:
+          type: string
+          default: ''
+          maxLength: 4000
+        expected_revision:
+          type: integer
+          minimum: 0
+        request_id:
+          type: string
+          format: uuid
+      required:
+      - decision
+      - expected_revision
+      - request_id
+    DecisionInputDecisionEnum:
+      enum:
+      - approved
+      - rejected
+      - review
+      type: string
+      description: |-
+        * `approved` - approved
+        * `rejected` - rejected
+        * `review` - review
+    FeedbackResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        page:
+          type: integer
+        pages:
+          type: integer
+        count:
+          type: integer
+      required:
+      - count
+      - items
+      - page
+      - pages
+    GalleryResponse:
+      type: object
+      properties:
+        property:
+          $ref: '#/components/schemas/Property'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Photo'
+      required:
+      - groups
+      - photos
+      - property
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+      required:
+      - id
+      - name
+    LoginInput:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    PasswordInput:
+      type: object
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+        new_password1:
+          type: string
+          writeOnly: true
+          minLength: 12
+        new_password2:
+          type: string
+          writeOnly: true
+          minLength: 12
+      required:
+      - new_password1
+      - new_password2
+      - old_password
+    PatchedCustomerUpdateInput:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        new_password1:
+          type: string
+          writeOnly: true
+          minLength: 12
+        new_password2:
+          type: string
+          writeOnly: true
+          minLength: 12
+    PatchedPhotoInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 140
+        group:
+          type: integer
+          nullable: true
+        position:
+          type: integer
+          minimum: 0
+        hidden:
+          type: boolean
+    PatchedPropertyInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 160
+        address:
+          type: string
+          maxLength: 240
+        customer:
+          type: integer
+        archived:
+          type: boolean
+        delivery_url:
+          oneOf:
+          - type: string
+            format: uri
+          - type: string
+            maxLength: 0
+        delivery_shared:
+          type: boolean
+    Photo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        property_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 140
+        group_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        hidden:
+          type: boolean
+        latest:
+          allOf:
+          - $ref: '#/components/schemas/Version'
+          nullable: true
+          readOnly: true
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Version'
+          readOnly: true
+      required:
+      - group_id
+      - id
+      - latest
+      - name
+      - property_id
+      - versions
+    PhotoResponse:
+      type: object
+      properties:
+        photo:
+          $ref: '#/components/schemas/Photo'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+      required:
+      - comments
+      - photo
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 160
+        address:
+          type: string
+          maxLength: 240
+        customer:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        archived:
+          type: boolean
+        delivery_url:
+          type: string
+          readOnly: true
+        delivery_shared:
+          type: boolean
+        cover:
+          allOf:
+          - $ref: '#/components/schemas/Version'
+          nullable: true
+          readOnly: true
+        photo_count:
+          type: integer
+          readOnly: true
+        reviewed_count:
+          type: integer
+          readOnly: true
+      required:
+      - cover
+      - customer
+      - delivery_url
+      - id
+      - name
+      - photo_count
+      - reviewed_count
+    PropertyInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 160
+        address:
+          type: string
+          maxLength: 240
+        customer:
+          type: integer
+        archived:
+          type: boolean
+        delivery_url:
+          oneOf:
+          - type: string
+            format: uri
+          - type: string
+            maxLength: 0
+        delivery_shared:
+          type: boolean
+      required:
+      - customer
+      - name
+    ReplacementInput:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        photo:
+          type: string
+          format: uri
+        note:
+          type: string
+          maxLength: 500
+      required:
+      - photo
+      - request_id
+    ResolveInput:
+      type: object
+      properties:
+        resolved:
+          type: boolean
+      required:
+      - resolved
+    SessionResponse:
+      type: object
+      properties:
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          nullable: true
+        csrf:
+          type: string
+        must_change_password:
+          type: boolean
+        version:
+          type: string
+      required:
+      - csrf
+      - must_change_password
+      - user
+      - version
+    StatusEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      - review
+      type: string
+      description: |-
+        * `pending` - Awaiting review
+        * `approved` - Approved
+        * `rejected` - Rejected — not needed
+        * `review` - Review — changes needed
+    UploadInput:
+      type: object
+      properties:
+        group:
+          type: integer
+          nullable: true
+        photos:
+          type: array
+          items:
+            type: string
+            format: uri
+          maxItems: 10
+          minItems: 1
+      required:
+      - photos
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+      required:
+      - id
+      - username
+    Version:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        label:
+          type: string
+          maxLength: 140
+        note:
+          type: string
+          maxLength: 500
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        review_revision:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        image_url:
+          type: string
+          readOnly: true
+        thumb_url:
+          type: string
+          readOnly: true
+      required:
+      - created
+      - id
+      - image_url
+      - label
+      - number
+      - thumb_url
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

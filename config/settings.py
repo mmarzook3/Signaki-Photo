@@ -35,3 +35,6 @@ APP_VERSION=os.environ.get('APP_VERSION','development')
 REST_FRAMEWORK = {"DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"], "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"], "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
 SPECTACULAR_SETTINGS = {"TITLE": "Signaki API", "VERSION": "1.0.0", "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"]}
 NEW_UI_ENABLED = os.environ.get("NEW_UI_ENABLED", "0") == "1"
+
+if (BASE_DIR / "frontend" / "dist").exists():
+ STATICFILES_DIRS.append(("ui", BASE_DIR / "frontend" / "dist"))

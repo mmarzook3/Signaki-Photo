@@ -1,0 +1,13 @@
+import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { CheckCircle2, ArrowUpRight } from 'lucide-react'
+import { api, write, message } from '@/api/client'
+import type { FeedbackPage } from '@/api/types'
+import { Button } from '@/components/ui/button'
+import { Loading, ErrorNotice, Empty } from '@/components/common'
+export function Feedback() {
+  const [status, setStatus] = useState('open'); const [page, setPage] = useState(1); const [error, setError] = useState(''); const [busy, setBusy] = useState(''); const query = useQueryClient()
+  const result = useQuery({ queryKey: ['feedback', status, page], queryFn: () => api<FeedbackPage>(`feedback/?status=${status}&page=${page}`) })
+  return <><div className="page-heading"><div><p className="eyebrow">REVIEW WORKSPACE</p><h1>Customer feedback</h1><p className="muted">Every request, connected to its photo and version.</p></div><Button variant="outline" onClick={() => { setStatus(s => s === 'open' ? 'all' : 'open'); setPage(1) }}>{status === 'open' ? 'Show all feedback' : 'Show unresolved only'}</Button></div>{error && <ErrorNotice error={error} />}{result.isPending ? <Loading /> : result.error ? <ErrorNotice error={message(result.error)} /> : <>{result.data.items.map(c => <article className="feedback-row" key={c.id}><div><Link to="/app/photos/$photoId" params={{ photoId: c.photo_id }} search={{ version: c.version_id }}><strong>{c.property_name} / {c.photo_name}</strong><span className="version-chip">v{c.version_number}</span><ArrowUpRight size={16} /></Link><p>{c.text}</p><span className="caption">{c.author.first_name || c.author.username} · {new Date(c.created).toLocaleString('en-GB')} · {c.resolved ? 'Resolved' : 'Open'}</span></div><Button variant="outline" disabled={busy === c.id} onClick={async () => { setBusy(c.id); try { await write(`comments/${c.id}/resolve/`, { resolved: !c.resolved }); await query.invalidateQueries({ queryKey: ['feedback'] }); await query.invalidateQueries({ queryKey: ['photo', c.photo_id] }) } catch (err) { setError(message(err)) } finally { setBusy('') } }}><CheckCircle2 size={15} />{c.resolved ? 'Reopen' : 'Resolve'}</Button></article>)}{!result.data.items.length && <Empty title="All caught up" text="No feedback in this view." />}<div className="pagination"><Button variant="outline" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Previous</Button><span>Page {result.data.page} of {result.data.pages}</span><Button variant="outline" disabled={page >= result.data.pages} onClick={() => setPage(p => p + 1)}>Next</Button></div></>}</>
+}
