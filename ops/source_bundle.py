@@ -8,6 +8,9 @@ import tarfile
 ROOT = Path(__file__).resolve().parents[1]
 
 def bundle():
+    for args in [['git', 'diff', '--quiet'], ['git', 'diff', '--cached', '--quiet']]:
+        if subprocess.run(args, cwd=ROOT).returncode:
+            raise RuntimeError('Commit tracked changes before creating a release bundle.')
     names = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
     paths = [ROOT / name for name in names if name]
     forbidden = {'.env', '.venv', 'node_modules', 'data', 'artifacts', 'output', '.playwright-cli', 'test-results', 'playwright-report'}
