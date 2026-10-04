@@ -10,3 +10,15 @@ tests
 .playwright-cli
 
 output/
+
+.git
+node_modules
+frontend/dist
+frontend/storybook-static
+frontend/test-results
+frontend/playwright-report
+frontend/e2e
+frontend/.storybook
+frontend/src/**/*.stories.tsx
+frontend/src/**/*.test.tsx
+
