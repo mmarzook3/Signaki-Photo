@@ -305,7 +305,7 @@
   background: #fff;
   color: #20252b;
   border-radius: 20px;
-  padding: 18px 18px 14px;
+  padding: 20px 16px 14px;
   position: relative;
   font:
     14px/1.45 Arial,
@@ -319,12 +319,12 @@
   border: 0;
   background: white;
   color: #20252b;
-  resize: vertical;
-  min-height: 65px;
+  resize: none;
+  min-height: 58px;
   width: 100%;
   padding: 4px 22px 8px 0;
   font:
-    16px/1.5 Arial,
+    18px/1.5 Arial,
     Helvetica,
     sans-serif;
   outline: none;
@@ -348,7 +348,7 @@
 .anchor-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
 }
 .anchor-footer > span {
@@ -359,13 +359,14 @@
   font-size: 11px;
 }
 .anchor-footer button {
-  height: 44px;
+  height: 50px;
+  min-width: 108px;
   padding: 0 24px;
   background: #4c55fa;
   border: 0;
   border-radius: 999px;
   color: white;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
 }
 .anchor-footer button:disabled {
@@ -528,3 +529,5 @@
     transition: none;
   }
 }
+
+.anchor-close{opacity:0;transition:opacity .12s}.anchor-card:hover .anchor-close,.anchor-close:focus-visible{opacity:1}.anchor-footer button:disabled{opacity:1;background:#4c55fa;cursor:default}@media(hover:none){.anchor-close{opacity:.55}}

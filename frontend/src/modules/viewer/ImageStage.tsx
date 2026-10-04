@@ -61,7 +61,7 @@ export function ImageStage({
     y: box.height / 2 + (((point[1] - 0.5) * width) / ratio) * zoom + pan.y,
   });
   const at = anchor ? position(anchor) : null;
-  const cardWidth = Math.min(410, Math.max(220, box.width - 24));
+  const cardWidth = Math.min(500, Math.max(220, box.width - 24));
   const left = at
     ? Math.max(12, Math.min(box.width - cardWidth - 12, at.x + 24))
     : 12;

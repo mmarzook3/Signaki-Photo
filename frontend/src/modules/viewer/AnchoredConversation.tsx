@@ -1,7 +1,7 @@
 import type {Annotation} from "@/modules/review/types";
 const EMPTY_SHAPES:Annotation[]=[];
 import { useRef, useState } from "react";
-import { X, CheckCheck, CornerDownRight } from "lucide-react";
+import { X, CheckCheck } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { write, message } from "@/api/client";
 import type { Comment, Photo, Version } from "@/api/types";
@@ -142,18 +142,7 @@ export function AnchoredConversation({
             onChange={(e) => setDraft(key, e.target.value)}
           />
           <div className="anchor-footer">
-            <span>
-              {thread ? (
-                <>
-                  <CornerDownRight size={14} />
-                  Reply to this conversation
-                </>
-              ) : shapes.length ? (
-                `${shapes.length} mark${shapes.length === 1 ? "" : "s"} · Version ${version.number}`
-              ) : (
-                `Version ${version.number}`
-              )}
-            </span>
+            <span className="sr-only">{thread?'Reply to this conversation':`${shapes.length} marks · Version ${version.number}`}</span>
             <button type="submit" disabled={busy || !draft.trim()}>
               {busy ? "Sending…" : "Send"}
             </button>
