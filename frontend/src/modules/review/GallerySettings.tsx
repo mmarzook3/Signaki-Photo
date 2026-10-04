@@ -63,12 +63,7 @@ export function GallerySettings({
             to this property only.
           </DialogDescription>
         </DialogHeader>
-        {open && (
-          <SettingsForm
-            key={JSON.stringify(property.review_settings)}
-            property={property}
-          />
-        )}
+        {open && <SettingsForm key={property.id} property={property} />}
       </DialogContent>
     </Dialog>
   );

@@ -23,6 +23,47 @@ test.beforeEach(({ page }) => {
 });
 test.afterEach(({ page }) => expect(errors.get(page)).toEqual([]));
 test.describe.configure({ mode: "serial" });
+test("all drawing tools retain normalized coordinates when zoomed", async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto(`/app/properties/${qa.property}`);
+  await page.locator(".photo-card").nth(1).click();
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "Draw", exact: true }).click();
+  for (const tool of ["pin", "pen", "rectangle", "ellipse", "arrow"]) {
+    await page.getByLabel("Drawing tool", { exact: true }).selectOption(tool);
+    const box = (await page
+      .locator(".annotation-layer.is-drawing")
+      .boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.4);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.6, {
+      steps: 5,
+    });
+    await page.mouse.up();
+  }
+  await expect(page.getByText("5 annotation(s) ready to save.")).toBeVisible();
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(page.getByText("4 annotation(s) ready to save.")).toBeVisible();
+  const text = "All tools " + Date.now();
+  await page.getByLabel(/Comment on version/).fill(text);
+  await page.getByRole("button", { name: "Send comment", exact: true }).click();
+  await expect(
+    page.locator(".comment").filter({ hasText: text }),
+  ).toBeVisible();
+  const id = page.url().split("/photos/")[1].split("?")[0];
+  const data = await (await page.request.get(`/api/v1/photos/${id}/`)).json();
+  const shapes = data.comments.find(
+    (c: { text: string }) => c.text === text,
+  ).annotations;
+  expect(shapes).toHaveLength(4);
+  expect(shapes[2].points[0][0]).toBeCloseTo(0.4, 2);
+  expect(shapes[2].points[1][1]).toBeCloseTo(0.6, 2);
+  await page.getByRole("button", { name: "Done drawing" }).click();
+  await page.getByRole("button", { name: "Reset zoom", exact: true }).click();
+  await expect(page.locator(".annotation-layer ellipse").first()).toBeVisible();
+});
 test("favorite, label, drawings and threaded feedback persist on the selected version", async ({
   page,
 }) => {
@@ -69,7 +110,10 @@ test("favorite, label, drawings and threaded feedback persist on the selected ve
   await page.getByLabel(/Comment on version/).fill("Reply verification");
   await page.getByRole("button", { name: "Send comment", exact: true }).click();
   await expect(
-    page.locator(".comment.is-reply").filter({ hasText: "Reply verification" }).last(),
+    page
+      .locator(".comment.is-reply")
+      .filter({ hasText: "Reply verification" })
+      .last(),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "File information", exact: true })
@@ -151,15 +195,15 @@ test("customer downloads a review copy, uploads and records a gallery decision",
   await expect(
     page.getByRole("button", { name: "Add room", exact: true }),
   ).toHaveCount(0);
-  await page
-    .getByLabel("Choose photographs")
-    .setInputFiles({
-      name: `customer-${Date.now()}.jpg`,
-      mimeType: "image/jpeg",
-      buffer: readFileSync(qa.upload),
-    });
+  await page.getByLabel("Choose photographs").setInputFiles({
+    name: `customer-${Date.now()}.jpg`,
+    mimeType: "image/jpeg",
+    buffer: readFileSync(qa.upload),
+  });
   await page.getByRole("button", { name: /Upload.*photo/ }).click();
-  await expect(page.getByRole("status").filter({hasText:"Upload complete"})).toBeVisible();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Upload complete" }),
+  ).toBeVisible();
 });
 test("view-only preset hides collaboration and version access, then restores workflow", async ({
   page,

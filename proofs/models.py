@@ -5,9 +5,9 @@ class Profile(models.Model):
  user=models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
  must_change_password=models.BooleanField(default=True)
 class Property(models.Model):
- review_settings=models.JSONField(default=dict,blank=True)
- review_status=models.CharField(max_length=12,default="pending")
- review_revision=models.PositiveIntegerField(default=0)
+ review_settings=models.JSONField(default=dict,db_default={},blank=True)
+ review_status=models.CharField(max_length=12,default="pending",db_default="pending")
+ review_revision=models.PositiveIntegerField(default=0,db_default=0)
  id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
  name=models.CharField(max_length=160)
  address=models.CharField(max_length=240,blank=True)
@@ -24,7 +24,7 @@ class Group(models.Model):
  class Meta:
   ordering=['position','name'];constraints=[models.UniqueConstraint(fields=['property','name'],name='group_property_name')]
 class Photo(models.Model):
- color_label=models.CharField(max_length=12,blank=True)
+ color_label=models.CharField(max_length=12,blank=True,db_default="")
  id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
  property=models.ForeignKey(Property,on_delete=models.CASCADE,related_name='photos')
  group=models.ForeignKey(Group,on_delete=models.SET_NULL,null=True,blank=True,related_name='photos')
@@ -37,8 +37,8 @@ class Photo(models.Model):
  @builtins.property
  def latest(self):return self.versions.first()
 class Version(models.Model):
- clean_image=models.CharField(max_length=100,blank=True)
- clean_thumb=models.CharField(max_length=100,blank=True)
+ clean_image=models.CharField(max_length=100,blank=True,db_default="")
+ clean_thumb=models.CharField(max_length=100,blank=True,db_default="")
  id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
  photo=models.ForeignKey(Photo,on_delete=models.CASCADE,related_name='versions')
  number=models.PositiveIntegerField()
@@ -53,7 +53,7 @@ class Version(models.Model):
  class Meta:
   ordering=['-number'];constraints=[models.UniqueConstraint(fields=['photo','number'],name='version_photo_number')]
 class Comment(models.Model):
- annotations=models.JSONField(default=list,blank=True)
+ annotations=models.JSONField(default=list,blank=True,db_default=[])
  parent=models.ForeignKey("self",null=True,blank=True,on_delete=models.CASCADE,related_name="replies")
  id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
  version=models.ForeignKey(Version,on_delete=models.CASCADE,related_name='comments')

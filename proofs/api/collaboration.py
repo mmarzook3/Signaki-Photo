@@ -1,11 +1,12 @@
 """Gallery collaboration and private review-copy access."""
 from pathlib import Path
-from uuid import UUID
 from PIL import Image
 from django.conf import settings
 from django.db import transaction, IntegrityError
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from .review_contracts import GalleryConfiguration, PresetContract, FavoriteContract, LabelInput, LabelOutput, GalleryDecisionContract, GalleryDecisionResult, InformationContract
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -19,6 +20,7 @@ from .serializers import DecisionInput
 class PrivateView(APIView):
     permission_classes = [IsAuthenticated]
 
+@extend_schema_view(patch=extend_schema(request=GalleryConfiguration,responses=GalleryConfiguration))
 class GallerySettings(PrivateView):
     def patch(self, request, pk):
         staff(request)
@@ -26,6 +28,7 @@ class GallerySettings(PrivateView):
             prop = get_object_or_404(properties(request).select_for_update(), pk=pk)
             return Response(apply_settings(prop, request.data))
 
+@extend_schema_view(get=extend_schema(responses=PresetContract(many=True)),post=extend_schema(request=PresetContract,responses={201: {"type":"object","properties":{"id":{"type":"string"}}}}))
 class Presets(PrivateView):
     def get(self, request):
         staff(request)
@@ -45,6 +48,7 @@ class Presets(PrivateView):
             raise ValidationError('A preset with this name already exists.')
         return Response({'id':str(preset.pk)}, status=201)
 
+@extend_schema_view(put=extend_schema(request=FavoriteContract,responses=FavoriteContract))
 class PhotoFavorite(PrivateView):
     def put(self, request, pk):
         photo = get_object_or_404(photos(request).select_related('property'), pk=pk)
@@ -58,6 +62,7 @@ class PhotoFavorite(PrivateView):
             Favorite.objects.filter(user=request.user, photo=photo).delete()
         return Response({'favorite':value})
 
+@extend_schema_view(put=extend_schema(request=LabelInput,responses=LabelOutput))
 class PhotoLabel(PrivateView):
     def put(self, request, pk):
         photo = get_object_or_404(photos(request).select_related('property'), pk=pk)
@@ -70,6 +75,7 @@ class PhotoLabel(PrivateView):
         photo.save(update_fields=['color_label'])
         return Response({'color_label':value})
 
+@extend_schema_view(get=extend_schema(responses=GalleryDecisionContract(many=True)),post=extend_schema(request=DecisionInput,responses=GalleryDecisionResult))
 class PropertyDecision(PrivateView):
     def get(self, request, pk):
         prop = get_object_or_404(properties(request), pk=pk)
@@ -111,6 +117,7 @@ def review_path(version, size='image'):
         raise Http404
     return path
 
+@extend_schema_view(get=extend_schema(responses=InformationContract))
 class FileInformation(PrivateView):
     def get(self, request, pk):
         version=get_object_or_404(Version.objects.filter(photo__in=photos(request)),pk=pk)
@@ -121,6 +128,7 @@ class FileInformation(PrivateView):
             width,height=image.size
         return Response({'name':version.label,'width':width,'height':height,'bytes':path.stat().st_size,'format':'JPEG','version':version.number,'created':version.created,'kind':'Review copy'})
 
+@extend_schema_view(get=extend_schema(responses={(200,"image/jpeg"):bytes}))
 class Download(PrivateView):
     def get(self, request, pk):
         version=get_object_or_404(Version.objects.filter(photo__in=photos(request)),pk=pk)

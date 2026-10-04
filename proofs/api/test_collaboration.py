@@ -145,3 +145,19 @@ class CollaborationTests(TestCase):
         self.config(comments=False,asset_status=False)
         self.assertEqual(self.client.post(f'/photos/{self.photo.pk}/',{'version':self.version.pk,'text':'bypass'}).status_code,404)
         self.assertEqual(self.client.post(f'/photos/{self.photo.pk}/',{'version':self.version.pk,'decision':'approved'}).status_code,404)
+
+    def test_previous_release_inserts_survive_additive_migration(self):
+        # The previous image omits the new columns on INSERT. Persistent database
+        # defaults keep rollback writes working, not only reads of existing rows.
+        from django.db import connection
+        from django.utils import timezone
+        key=uuid.uuid4()
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO proofs_photo (id,property_id,group_id,name,hidden,position,created) VALUES (%s,%s,%s,%s,%s,%s,%s)',
+                [key.hex,self.prop.pk.hex,None,'Legacy writer',False,99,timezone.now()])
+        self.assertEqual(Photo.objects.get(pk=key).color_label,'')
+        key=uuid.uuid4()
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO proofs_comment (id,version_id,author_id,text,decision,resolved,created,request_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)',
+                [key.hex,self.version.pk.hex,self.owner.pk,'Legacy comment','',False,timezone.now(),None])
+        self.assertEqual(Comment.objects.get(pk=key).annotations,[])

@@ -344,6 +344,72 @@ paths:
               schema:
                 type: object
           description: ''
+  /api/v1/photos/{id}/favorite/:
+    put:
+      operationId: v1_photos_favorite_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FavoriteContract'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FavoriteContract'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FavoriteContract'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteContract'
+          description: ''
+  /api/v1/photos/{id}/label/:
+    put:
+      operationId: v1_photos_label_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabelInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LabelInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LabelInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelOutput'
+          description: ''
   /api/v1/photos/{id}/versions/:
     post:
       operationId: v1_photos_versions_create
@@ -376,6 +442,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Version'
+          description: ''
+  /api/v1/presets/:
+    get:
+      operationId: v1_presets_list
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PresetContract'
+          description: ''
+    post:
+      operationId: v1_presets_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresetContract'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PresetContract'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PresetContract'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
           description: ''
   /api/v1/properties/:
     get:
@@ -470,6 +580,61 @@ paths:
               schema:
                 type: object
           description: ''
+  /api/v1/properties/{id}/decision/:
+    get:
+      operationId: v1_properties_decision_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GalleryDecisionContract'
+          description: ''
+    post:
+      operationId: v1_properties_decision_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryDecisionResult'
+          description: ''
   /api/v1/properties/{id}/groups/:
     post:
       operationId: v1_properties_groups_create
@@ -502,6 +667,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+          description: ''
+  /api/v1/properties/{id}/settings/:
+    patch:
+      operationId: v1_properties_settings_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryConfiguration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryConfiguration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryConfiguration'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryConfiguration'
           description: ''
   /api/v1/properties/{id}/upload/:
     post:
@@ -657,6 +854,49 @@ paths:
               schema:
                 $ref: '#/components/schemas/Version'
           description: ''
+  /api/v1/versions/{id}/download/:
+    get:
+      operationId: v1_versions_download_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/v1/versions/{id}/information/:
+    get:
+      operationId: v1_versions_information_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformationContract'
+          description: ''
 components:
   schemas:
     BlankEnum:
@@ -703,6 +943,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+        annotations: {}
+        parent:
+          type: string
+          format: uuid
+          nullable: true
       required:
       - author
       - created
@@ -718,14 +963,21 @@ components:
       - approved
       - rejected
       - review
+      - in_progress
       type: string
       description: |-
         * `approved` - Approved
         * `rejected` - Rejected — not needed
         * `review` - Review — changes needed
+        * `in_progress` - In progress
     CommentInput:
       type: object
       properties:
+        annotations: {}
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
         text:
           type: string
           maxLength: 4000
@@ -778,11 +1030,20 @@ components:
       - approved
       - rejected
       - review
+      - in_progress
       type: string
       description: |-
         * `approved` - approved
         * `rejected` - rejected
         * `review` - review
+        * `in_progress` - in_progress
+    FavoriteContract:
+      type: object
+      properties:
+        favorite:
+          type: boolean
+      required:
+      - favorite
     FeedbackResponse:
       type: object
       properties:
@@ -801,6 +1062,75 @@ components:
       - items
       - page
       - pages
+    GalleryConfiguration:
+      type: object
+      properties:
+        view_only:
+          type: boolean
+        gallery_status:
+          type: boolean
+        asset_status:
+          type: boolean
+        favorites:
+          type: boolean
+        comments:
+          type: boolean
+        annotations:
+          type: boolean
+        color_labels:
+          type: boolean
+        download:
+          type: boolean
+        upload:
+          type: boolean
+        file_information:
+          type: boolean
+        workflow:
+          type: boolean
+        versioning:
+          type: boolean
+        watermark:
+          type: boolean
+        approved_downloads_only:
+          type: boolean
+        allowed_statuses:
+          type: array
+          items:
+            type: string
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabelDefinition'
+    GalleryDecisionContract:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        reason:
+          type: string
+        author:
+          type: string
+        created:
+          type: string
+          format: date-time
+      required:
+      - author
+      - created
+      - id
+      - reason
+      - status
+    GalleryDecisionResult:
+      type: object
+      properties:
+        status:
+          type: string
+        revision:
+          type: integer
+      required:
+      - revision
+      - status
     GalleryResponse:
       type: object
       properties:
@@ -835,6 +1165,66 @@ components:
       required:
       - id
       - name
+    InformationContract:
+      type: object
+      properties:
+        name:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        bytes:
+          type: integer
+        format:
+          type: string
+        version:
+          type: integer
+        created:
+          type: string
+          format: date-time
+        kind:
+          type: string
+      required:
+      - bytes
+      - created
+      - format
+      - height
+      - kind
+      - name
+      - version
+      - width
+    LabelDefinition:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          maxLength: 30
+        color:
+          type: string
+        enabled:
+          type: boolean
+      required:
+      - color
+      - enabled
+      - id
+      - name
+    LabelInput:
+      type: object
+      properties:
+        label:
+          type: string
+      required:
+      - label
+    LabelOutput:
+      type: object
+      properties:
+        color_label:
+          type: string
+      required:
+      - color_label
     LoginInput:
       type: object
       properties:
@@ -877,6 +1267,45 @@ components:
           type: string
           writeOnly: true
           minLength: 12
+    PatchedGalleryConfiguration:
+      type: object
+      properties:
+        view_only:
+          type: boolean
+        gallery_status:
+          type: boolean
+        asset_status:
+          type: boolean
+        favorites:
+          type: boolean
+        comments:
+          type: boolean
+        annotations:
+          type: boolean
+        color_labels:
+          type: boolean
+        download:
+          type: boolean
+        upload:
+          type: boolean
+        file_information:
+          type: boolean
+        workflow:
+          type: boolean
+        versioning:
+          type: boolean
+        watermark:
+          type: boolean
+        approved_downloads_only:
+          type: boolean
+        allowed_statuses:
+          type: array
+          items:
+            type: string
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabelDefinition'
     PatchedPhotoInput:
       type: object
       properties:
@@ -947,7 +1376,14 @@ components:
           items:
             $ref: '#/components/schemas/Version'
           readOnly: true
+        favorite:
+          type: boolean
+          readOnly: true
+        color_label:
+          type: string
+          maxLength: 12
       required:
+      - favorite
       - group_id
       - id
       - latest
@@ -966,6 +1402,25 @@ components:
       required:
       - comments
       - photo
+    PresetContract:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 80
+        config:
+          $ref: '#/components/schemas/GalleryConfiguration'
+        standard:
+          type: boolean
+          readOnly: true
+      required:
+      - config
+      - id
+      - name
+      - standard
     Property:
       type: object
       properties:
@@ -1001,6 +1456,21 @@ components:
         reviewed_count:
           type: integer
           readOnly: true
+        review_settings:
+          allOf:
+          - $ref: '#/components/schemas/GalleryConfiguration'
+          readOnly: true
+        review_status:
+          type: string
+          maxLength: 12
+        review_revision:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        watermark_locked:
+          type: boolean
+          readOnly: true
       required:
       - cover
       - customer
@@ -1008,7 +1478,9 @@ components:
       - id
       - name
       - photo_count
+      - review_settings
       - reviewed_count
+      - watermark_locked
     PropertyInput:
       type: object
       properties:
@@ -1079,12 +1551,14 @@ components:
       - approved
       - rejected
       - review
+      - in_progress
       type: string
       description: |-
         * `pending` - Awaiting review
         * `approved` - Approved
         * `rejected` - Rejected — not needed
         * `review` - Review — changes needed
+        * `in_progress` - In progress
     UploadInput:
       type: object
       properties:

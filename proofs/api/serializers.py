@@ -2,6 +2,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
+from .review_contracts import GalleryConfiguration
 from proofs.features import settings_for, allowed
 from proofs.annotations import validate_annotations
 from proofs.models import Property, Group, Photo, Version, Comment
@@ -80,6 +81,7 @@ class PropertySerializer(serializers.ModelSerializer):
     review_settings = serializers.SerializerMethodField()
     watermark_locked = serializers.SerializerMethodField()
 
+    @extend_schema_field(GalleryConfiguration)
     def get_review_settings(self, obj) -> dict:
         return settings_for(obj)
 

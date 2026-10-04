@@ -29,6 +29,9 @@ export function FeedbackPanel({
   comments: Comment[];
   onVersion: (id: string) => void;
 }) {
+  const orderedComments = comments
+    .filter((c) => !c.parent)
+    .flatMap((c) => [c, ...comments.filter((r) => r.parent === c.id)]);
   const user = useUser();
   const query = useQueryClient();
   const commentsAllowed = !settings || can(user.is_staff, settings, "comments");
@@ -155,7 +158,7 @@ export function FeedbackPanel({
           <span>{comments.length}</span>
         </div>
         {comments.length ? (
-          comments.map((c) => (
+          orderedComments.map((c) => (
             <article
               key={c.id}
               className={`comment ${c.parent ? "is-reply" : ""} ${c.resolved ? "is-resolved" : ""}`}

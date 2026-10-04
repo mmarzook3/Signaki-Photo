@@ -2007,6 +2007,51 @@ progress::-moz-progress-bar {
   }
 }
 
-.viewer-controls select,.drawing-toolbar select,.gallery-actions .decision-select{width:auto;max-width:180px;border-radius:22px;background:#242a34;border:0;height:34px;font-size:12px}
-.viewer-controls{row-gap:8px}.viewer-controls .version-control{order:-1}
-@media(max-width:650px){.viewer-controls select{max-width:140px;font-size:11px}.viewer-bottom{max-height:40vh;overflow:auto}}
+.viewer-controls select,
+.drawing-toolbar select,
+.gallery-actions .decision-select {
+  width: auto;
+  max-width: 180px;
+  border-radius: 22px;
+  background: #242a34;
+  border: 0;
+  height: 34px;
+  font-size: 12px;
+}
+.viewer-controls {
+  row-gap: 8px;
+}
+.viewer-controls .version-control {
+  order: -1;
+}
+@media (max-width: 650px) {
+  .viewer-controls select {
+    max-width: 140px;
+    font-size: 11px;
+  }
+  .viewer-bottom {
+    max-height: 40vh;
+    overflow: auto;
+  }
+}
+
+@media (min-width: 761px) {
+  .viewer-inspector {
+    overflow: hidden;
+  }
+  .viewer-inspector > .inspector-heading,
+  .viewer-inspector > .decision-block,
+  .viewer-inspector > .saved-notice {
+    flex-shrink: 0;
+  }
+  .viewer-inspector > .comment-list {
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1;
+  }
+  .viewer-inspector > .comment-composer {
+    position: static;
+    flex-shrink: 0;
+    padding-bottom: 0;
+  }
+}
