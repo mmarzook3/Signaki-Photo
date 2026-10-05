@@ -34,6 +34,7 @@ import { useDrafts } from "@/modules/feedback/drafts";
 import { Button } from "@/components/ui/button";
 import { ErrorNotice, Loading } from "@/components/common";
 import { FeedbackPanel } from "@/modules/feedback/FeedbackPanel";
+import { VideoStage } from "./VideoStage";
 import { ImageStage } from "./ImageStage";
 import { PhotoEditor } from "./PhotoEditor";
 export function Viewer() {
@@ -110,7 +111,7 @@ export function Viewer() {
     const handle = (e: KeyboardEvent) => {
       if (
         (e.target as HTMLElement)?.closest(
-          "input,textarea,select,[contenteditable],[role=dialog],[role=menu]",
+          "input,textarea,select,video,[contenteditable],[role=dialog],[role=menu]",
         ) ||
         document.querySelector("[role=dialog],[role=menu]") ||
         e.metaKey ||
@@ -274,7 +275,7 @@ export function Viewer() {
                   Version {selected.number}
                 </span>
               )}
-              {selected.media_kind === "video" ? (selected.processing === "ready" ? <video key={selected.id} ref={videoRef} src={selected.image_url} poster={selected.thumb_url} controls controlsList="nodownload" playsInline preload="metadata" aria-label={selected.label} style={{width:"100%",height:"100%",maxHeight:"70vh",objectFit:"contain"}} onTimeUpdate={e => setVideoTime(e.currentTarget.currentTime)} onLoadedMetadata={e => { const time = pendingSeek.current ?? 0; e.currentTarget.currentTime=time; setVideoTime(time); pendingSeek.current=null; }} /> : <div role="status" style={{padding:40}}>{selected.processing === "failed" ? selected.processing_error : "Preparing your watermarked video preview…"}</div>) : <ImageStage
+              {selected.media_kind === "video" ? <VideoStage key={selected.id} version={selected} player={videoRef} onTime={setVideoTime} onReady={video => { const time = pendingSeek.current ?? 0; video.currentTime = time; setVideoTime(time); pendingSeek.current = null; }} /> : <ImageStage
                 key={`${selected.id}-${compare}`}
                 src={selected.image_url}
                 label={selected.label}
@@ -425,7 +426,7 @@ export function Viewer() {
                   panel={panel}
                   onPanel={() => setPanel(!panel)}
                   onComment={() => {
-                    if (selected.media_kind === "video") { videoRef.current?.pause(); setPanel(true); return; }
+                    if (selected.media_kind === "video") { videoRef.current?.pause(); setVideoTime(videoRef.current?.currentTime ?? 0); setPanel(true); return; }
                     setPanel(false);
                     if (can(user.is_staff, settings, "annotations")) {
                       setTool("pin");
@@ -469,7 +470,7 @@ export function Viewer() {
               onVersion={versionChange}
               videoTime={videoTime}
               onSeek={(id, time) => { if (id !== selected.id) { pendingSeek.current=time; versionChange(id); } else if (videoRef.current) { videoRef.current.currentTime=time; videoRef.current.pause(); } }}
-              onPause={() => videoRef.current?.pause()}
+              onPause={() => { videoRef.current?.pause(); setVideoTime(videoRef.current?.currentTime ?? 0); }}
               settings={gallery.data.property.review_settings}
             />
           </aside>

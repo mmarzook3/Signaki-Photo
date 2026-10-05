@@ -108,7 +108,7 @@ export function Gallery() {
         ].filter(
           (g) => g.photos.length || groups.some((x) => String(x.id) === g.key),
         )
-      : [{ key: "all", label: "All photographs", photos: shown }];
+      : [{ key: "all", label: "All media", photos: shown }];
   const reviewed = photos.filter(
     (p) => p.latest && p.latest.status !== "pending",
   ).length;
@@ -128,7 +128,7 @@ export function Gallery() {
             className={search.view !== "grouped" ? "active" : ""}
             onClick={() => update({ view: "all" })}
           >
-            All photos
+            All media
           </button>
           <button
             className={search.view === "grouped" ? "active" : ""}
@@ -188,7 +188,7 @@ export function Gallery() {
                 <span> / {photos.length}</span>
               </strong>
               <progress value={reviewed} max={Math.max(photos.length, 1)} />
-              <p className="caption">photographs reviewed</p>
+              <p className="caption">items reviewed</p>
             </div>
             <p className="filter-title">Status</p>
             <button
@@ -196,7 +196,7 @@ export function Gallery() {
               onClick={() => update({ status: "all" })}
             >
               <Grid2X2 size={17} />
-              All photographs<span>{photos.length}</span>
+              All media<span>{photos.length}</span>
             </button>
             {(Object.keys(statuses) as Status[]).map((s) => {
               const Icon = {
@@ -266,7 +266,7 @@ export function Gallery() {
             <p className="rail-note">
               Review previews.
               <br />
-              Final photographs delivered separately.
+              Final files delivered separately.
             </p>
           </aside>
         )}
@@ -286,7 +286,7 @@ export function Gallery() {
               <div className="search-field">
                 <Search size={16} />
                 <Input
-                  aria-label="Search photographs"
+                  aria-label="Search files"
                   placeholder="Search filenames…"
                   value={search.q || ""}
                   onChange={(e) => update({ q: e.target.value })}
@@ -294,7 +294,7 @@ export function Gallery() {
               </div>
             )}
             <span className="caption result-count" aria-live="polite">
-              {shown.length} photographs
+              {shown.length} files
             </span>
             <Button
               variant="outline"
@@ -342,7 +342,7 @@ export function Gallery() {
                   <div className="collection-heading">
                     <h2>{property.name}</h2>
                     <span className="caption">
-                      Latest versions · Select a photo to review
+                      Latest versions · Select a photo or video to review
                     </span>
                   </div>
                 )}
@@ -359,7 +359,7 @@ export function Gallery() {
                       />
                     ))}
                     {!section.photos.length && (
-                      <p className="muted">No photographs in this room.</p>
+                      <p className="muted">No files in this room.</p>
                     )}
                   </div>
                 )}
@@ -368,7 +368,7 @@ export function Gallery() {
           })}
           {!shown.length && (
             <Empty
-              title="No matching photographs"
+              title="No matching files"
               text="Try a different filename, room or status."
             />
           )}

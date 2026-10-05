@@ -111,7 +111,7 @@ export function UploadDialog({
             <strong>Drop photos or videos here or choose files</strong>
             <span>JPEG, PNG, WebP, MP4, MOV or WebM · up to 10 files</span>
             <input
-              aria-label="Choose photographs"
+              aria-label="Choose photos or videos"
               type="file"
               multiple
               accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.m4v"

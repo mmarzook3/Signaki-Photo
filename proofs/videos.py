@@ -1,7 +1,6 @@
 """Private, bounded video ingestion and background review transcoding."""
 import json
 import math
-import shutil
 import subprocess
 import tempfile
 import uuid
@@ -72,7 +71,7 @@ def transcode(version):
     name = uuid.uuid4().hex
     output, thumb = root / (name + '.mp4'), root / (name + '.jpg')
     try:
-        with tempfile.TemporaryDirectory(dir=root) as scratch:
+        with tempfile.TemporaryDirectory(prefix="video-job-", dir=root) as scratch:
             scratch = Path(scratch)
             scaled = scratch / 'scaled.mp4'
             # Autorotate before scaling; bound both portrait and landscape to 1280x720/720x1280.

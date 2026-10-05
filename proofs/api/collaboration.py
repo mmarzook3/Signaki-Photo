@@ -129,6 +129,11 @@ class FileInformation(PrivateView):
         path=review_path(version)
         with Image.open(review_path(version,'thumb') if version.media_kind=='video' else path) as image:
             width,height=image.size
+        if version.media_kind=='video':
+            import json
+            from proofs.videos import run
+            data=json.loads(run(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(path)]).stdout)
+            width,height=data['streams'][0]['width'],data['streams'][0]['height']
         return Response({'name':version.label,'width':width,'height':height,'bytes':path.stat().st_size,'format':'MP4 (preview)' if version.media_kind=='video' else 'JPEG','version':version.number,'created':version.created,'kind':'Review copy'})
 
 @extend_schema_view(get=extend_schema(responses={(200,"image/jpeg"):bytes}))
