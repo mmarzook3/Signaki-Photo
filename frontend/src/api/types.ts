@@ -12,6 +12,10 @@ export type User = Output<Schema["User"]>;
 export type Session = Output<Schema["SessionResponse"]>;
 export type Version = Omit<Output<Schema["Version"]>, "status"> & {
   status: Status;
+  media_kind?: "image" | "video";
+  processing?: "queued" | "processing" | "ready" | "failed";
+  processing_error?: string;
+  duration?: number;
 };
 export type Property = Output<Schema["Property"]> & {
   review_settings: ReviewSettings;
@@ -29,6 +33,7 @@ export type Photo = Omit<Output<Schema["Photo"]>, "latest" | "versions"> & {
 export type Comment = Output<Schema["Comment"]> & {
   annotations: Annotation[];
   parent: string | null;
+  timestamp_seconds?: number | null;
 };
 export type Gallery = { property: Property; groups: Group[]; photos: Photo[] };
 export type PhotoDetail = { photo: Photo; comments: Comment[] };

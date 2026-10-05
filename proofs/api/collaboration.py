@@ -107,9 +107,12 @@ class PropertyDecision(PrivateView):
         return Response({'status':prop.review_status,'revision':prop.review_revision})
 
 def review_path(version, size='image'):
+    if version.media_kind == 'video' and size == 'image' and version.processing != 'ready':
+        from django.http import Http404
+        raise Http404
     prop=version.photo.property
     name=getattr(version,size)
-    if not settings_for(prop)['watermark']:
+    if version.media_kind != 'video' and not settings_for(prop)['watermark']:
         name=getattr(version,'clean_'+size) or name
     path=Path(settings.MEDIA_ROOT)/name
     if not path.is_file():
@@ -124,9 +127,9 @@ class FileInformation(PrivateView):
         require(request.user,version.photo.property,'file_information')
         visible_version(request.user,version)
         path=review_path(version)
-        with Image.open(path) as image:
+        with Image.open(review_path(version,'thumb') if version.media_kind=='video' else path) as image:
             width,height=image.size
-        return Response({'name':version.label,'width':width,'height':height,'bytes':path.stat().st_size,'format':'JPEG','version':version.number,'created':version.created,'kind':'Review copy'})
+        return Response({'name':version.label,'width':width,'height':height,'bytes':path.stat().st_size,'format':'MP4 (preview)' if version.media_kind=='video' else 'JPEG','version':version.number,'created':version.created,'kind':'Review copy'})
 
 @extend_schema_view(get=extend_schema(responses={(200,"image/jpeg"):bytes}))
 class Download(PrivateView):
@@ -136,4 +139,5 @@ class Download(PrivateView):
         visible_version(request.user,version)
         if not request.user.is_staff and settings_for(version.photo.property)['approved_downloads_only'] and version.status!='approved':
             raise PermissionDenied('Only approved photographs can be downloaded.')
-        return FileResponse(review_path(version).open('rb'),as_attachment=True,filename=f'{version.photo.name}-v{version.number}-review.jpg',content_type='image/jpeg')
+        video=version.media_kind=='video'
+        return FileResponse(review_path(version).open('rb'),as_attachment=True,filename=f'{version.photo.name}-v{version.number}-review.'+('mp4' if video else 'jpg'),content_type='video/mp4' if video else 'image/jpeg')

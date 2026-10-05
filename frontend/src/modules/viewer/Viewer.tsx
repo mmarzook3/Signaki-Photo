@@ -54,9 +54,13 @@ export function Viewer() {
   const [comparison, setComparison] = useState("");
   const [edit, setEdit] = useState<"settings" | "replacement" | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoTime, setVideoTime] = useState(0);
+  const pendingSeek = useRef<number | null>(null);
   const details = useQuery({
     queryKey: ["photo", photoId],
     queryFn: () => api<PhotoDetail>(`photos/${photoId}/`),
+    refetchInterval: (q) => q.state.data?.photo.versions.some(v => v.processing === "queued" || v.processing === "processing") ? 3000 : false,
   });
   const propertyId = details.data?.photo.property_id || "";
   const gallery = useQuery({
@@ -127,7 +131,7 @@ export function Viewer() {
     return () => window.removeEventListener("keydown", handle);
   });
   useEffect(() => {
-    const images = [previous?.latest?.image_url, next?.latest?.image_url]
+    const images = [previous?.latest?.thumb_url, next?.latest?.thumb_url]
       .filter(Boolean)
       .map((src) => {
         const im = new Image();
@@ -138,7 +142,7 @@ export function Viewer() {
       images.forEach((im) => {
         im.src = "";
       });
-  }, [previous?.latest?.image_url, next?.latest?.image_url]);
+  }, [previous?.latest?.thumb_url, next?.latest?.thumb_url]);
   if (details.isPending || (propertyId && gallery.isPending))
     return <Loading />;
   if (details.error || gallery.error)
@@ -270,7 +274,7 @@ export function Viewer() {
                   Version {selected.number}
                 </span>
               )}
-              <ImageStage
+              {selected.media_kind === "video" ? (selected.processing === "ready" ? <video key={selected.id} ref={videoRef} src={selected.image_url} poster={selected.thumb_url} controls controlsList="nodownload" playsInline preload="metadata" aria-label={selected.label} style={{width:"100%",height:"100%",maxHeight:"70vh",objectFit:"contain"}} onTimeUpdate={e => setVideoTime(e.currentTarget.currentTime)} onLoadedMetadata={e => { const time = pendingSeek.current ?? 0; e.currentTarget.currentTime=time; setVideoTime(time); pendingSeek.current=null; }} /> : <div role="status" style={{padding:40}}>{selected.processing === "failed" ? selected.processing_error : "Preparing your watermarked video preview…"}</div>) : <ImageStage
                 key={`${selected.id}-${compare}`}
                 src={selected.image_url}
                 label={selected.label}
@@ -328,7 +332,7 @@ export function Viewer() {
                   setShapes(selected.id, s);
                   setConversation("draft");
                 }}
-              />
+              />}
             </div>
             {compare && other && (
               <div className="version-stage">
@@ -421,6 +425,7 @@ export function Viewer() {
                   panel={panel}
                   onPanel={() => setPanel(!panel)}
                   onComment={() => {
+                    if (selected.media_kind === "video") { videoRef.current?.pause(); setPanel(true); return; }
                     setPanel(false);
                     if (can(user.is_staff, settings, "annotations")) {
                       setTool("pin");
@@ -462,6 +467,9 @@ export function Viewer() {
               version={selected}
               comments={details.data.comments}
               onVersion={versionChange}
+              videoTime={videoTime}
+              onSeek={(id, time) => { if (id !== selected.id) { pendingSeek.current=time; versionChange(id); } else if (videoRef.current) { videoRef.current.currentTime=time; videoRef.current.pause(); } }}
+              onPause={() => videoRef.current?.pause()}
               settings={gallery.data.property.review_settings}
             />
           </aside>

@@ -129,7 +129,7 @@ export function PhotoEditor({
                 <Input
                   name="photo"
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.m4v"
                   required
                   onChange={() => {
                     key.current = crypto.randomUUID();
@@ -145,7 +145,7 @@ export function PhotoEditor({
                 />
               </label>
               <p className="caption">
-                25 MB maximum, JPEG/PNG/WebP. Only watermarked review
+                Photos: 25 MB. Videos: 250 MB / 5 minutes. Only review
                 derivatives are stored.
               </p>
             </>

@@ -30,6 +30,26 @@ services:
     logging:
       driver: json-file
       options: {max-size: "10m", max-file: "3"}
+  video-worker:
+    image: photo-scanaki:${APP_VERSION}
+    command: [python, manage.py, process_videos]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      HOME: /tmp
+    volumes: ["./data:/data"]
+    networks: [private]
+    read_only: true
+    tmpfs: ["/tmp:size=128m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
 networks:
   private:
     internal: false

@@ -180,6 +180,7 @@ class Decision(APIView):
         data = data.validated_data
         with transaction.atomic():
             version = get_object_or_404(Version.objects.select_for_update().filter(photo__in=photos(request)), pk=pk)
+            if version.processing != 'ready': raise ValidationError('Wait for the preview before reviewing it.')
             require(request.user, version.photo.property, 'asset_status')
             visible_version(request.user, version)
             if data['decision'] not in settings_for(version.photo.property)['allowed_statuses']:
@@ -214,8 +215,15 @@ class Comments(APIView):
         parent = None
         if data['parent_id']:
             parent = get_object_or_404(Comment, pk=data['parent_id'], version=version, parent__isnull=True)
+        timestamp = parent.timestamp_seconds if parent else data['timestamp_seconds']
+        import math
+        if timestamp is not None and (not math.isfinite(timestamp) or version.media_kind != 'video' or timestamp > version.duration):
+            raise ValidationError('Choose a timestamp within this video.')
+        if version.media_kind == 'video' and (version.processing != 'ready' or data['annotations']):
+            raise ValidationError('Wait for the video preview. Use timestamped comments for video feedback.')
         with transaction.atomic():
-            comment, created = Comment.objects.get_or_create(request_id=data['request_id'], defaults={'version': version, 'author': request.user, 'text': data['text'], 'annotations':data['annotations'], 'parent':parent})
+            comment, created = Comment.objects.get_or_create(request_id=data['request_id'], defaults={'version': version, 'author': request.user, 'text': data['text'], 'annotations':data['annotations'], 'parent':parent, 'timestamp_seconds':timestamp})
+            if comment.timestamp_seconds != timestamp: raise ValidationError('Request identifier has already been used.')
             if comment.author_id != request.user.pk or comment.version_id != version.pk or comment.text != data['text'] or comment.decision or comment.annotations != data['annotations'] or comment.parent_id != data['parent_id']:
                 raise ValidationError('Request identifier has already been used.')
         return Response(CommentSerializer(comment).data, status=201 if created else 200)
@@ -308,8 +316,8 @@ class Upload(APIView):
                 raise ValidationError({'group': 'Choose a valid room.'})
             group = get_object_or_404(Group, pk=group_id, property=prop)
         files = request.FILES.getlist('photos')
-        if not 1 <= len(files) <= 10 or sum(f.size for f in files) > 64 * 1024 * 1024:
-            raise ValidationError('Choose 1–10 photos, totalling no more than 64 MB.')
+        if not 1 <= len(files) <= 10 or sum(f.size for f in files) > 250 * 1024 * 1024:
+            raise ValidationError('Choose 1–10 files, totalling no more than 250 MB.')
         from pathlib import Path
         result = []
         for file in files:

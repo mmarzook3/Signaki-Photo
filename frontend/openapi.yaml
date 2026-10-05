@@ -948,6 +948,10 @@ components:
           type: string
           format: uuid
           nullable: true
+        timestamp_seconds:
+          type: number
+          format: double
+          nullable: true
       required:
       - author
       - created
@@ -973,6 +977,12 @@ components:
     CommentInput:
       type: object
       properties:
+        timestamp_seconds:
+          type: number
+          format: double
+          maximum: 300
+          minimum: 0
+          nullable: true
         annotations: {}
         parent_id:
           type: string
@@ -1636,6 +1646,18 @@ components:
         thumb_url:
           type: string
           readOnly: true
+        media_kind:
+          type: string
+          maxLength: 8
+        processing:
+          type: string
+          maxLength: 12
+        processing_error:
+          type: string
+          maxLength: 200
+        duration:
+          type: number
+          format: double
       required:
       - created
       - id

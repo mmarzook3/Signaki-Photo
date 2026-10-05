@@ -20,7 +20,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Version
-        fields = ['id', 'number', 'label', 'note', 'status', 'created', 'review_revision', 'image_url', 'thumb_url']
+        fields = ['id', 'number', 'label', 'note', 'status', 'created', 'review_revision', 'image_url', 'thumb_url', 'media_kind', 'processing', 'processing_error', 'duration']
 
     def get_image_url(self, obj) -> str:
         return f'/proof/{obj.pk}/image/'
@@ -73,7 +73,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'version_id', 'version_number', 'photo_id', 'photo_name', 'property_name', 'author', 'text', 'decision', 'resolved', 'created', 'annotations', 'parent']
+        fields = ['id', 'version_id', 'version_number', 'photo_id', 'photo_name', 'property_name', 'author', 'text', 'decision', 'resolved', 'created', 'annotations', 'parent', 'timestamp_seconds']
 
 
 class PropertySerializer(serializers.ModelSerializer):
@@ -129,6 +129,7 @@ class DecisionInput(serializers.Serializer):
 
 
 class CommentInput(serializers.Serializer):
+    timestamp_seconds = serializers.FloatField(required=False, allow_null=True, default=None, min_value=0, max_value=300)
     annotations = serializers.JSONField(required=False, default=list)
     parent_id = serializers.UUIDField(required=False, allow_null=True, default=None)
 

@@ -43,9 +43,9 @@ def main():
     env.chmod(0o600)
     compose = ['docker', 'compose', '--project-directory', str(root), '-f', str(root / 'compose.yaml')]
     try:
-        run(compose + ['stop', 'web'], stdin=subprocess.DEVNULL)
+        run(compose + ['stop', 'web', 'video-worker'], stdin=subprocess.DEVNULL)
         run(compose + ['run', '--rm', '-T', '--interactive=false', 'web', 'python', 'manage.py', 'migrate', '--noinput'], stdin=subprocess.DEVNULL)
-        run(compose + ['up', '-d', '--no-build', 'web'], stdin=subprocess.DEVNULL)
+        run(compose + ['up', '-d', '--no-build', 'web', 'video-worker'], stdin=subprocess.DEVNULL)
         for _ in range(30):
             result = subprocess.run(['curl', '--max-time', '3', '-fsS', 'http://127.0.0.1:18120/healthz/'], capture_output=True)
             if result.returncode == 0 and json.loads(result.stdout).get('version') == args.version:
@@ -62,6 +62,7 @@ def main():
         (record / 'release.json').write_text(json.dumps(summary, indent=2))
         print(json.dumps(summary))
     except Exception:
+        run(compose + ['stop', 'video-worker'], stdin=subprocess.DEVNULL)
         env.write_bytes(previous)
         env.chmod(0o600)
         run(compose + ['up', '-d', '--no-build', 'web'], stdin=subprocess.DEVNULL)

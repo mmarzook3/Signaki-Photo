@@ -22,7 +22,11 @@ export function FeedbackPanel({
   comments,
   onVersion,
   settings,
+  videoTime = 0, onSeek, onPause,
 }: {
+  videoTime?: number;
+  onSeek?: (version: string, time: number) => void;
+  onPause?: () => void;
   settings?: ReviewSettings;
   photo: Photo;
   version: Version;
@@ -186,6 +190,7 @@ export function FeedbackPanel({
               {c.decision && (
                 <StatusBadge status={c.decision as Version["status"]} />
               )}
+              {c.timestamp_seconds != null && <button className="version-chip" onClick={() => onSeek?.(c.version_id, c.timestamp_seconds!)}>▶ {Math.floor(c.timestamp_seconds / 60)}:{(c.timestamp_seconds % 60).toFixed(1).padStart(4,"0")}</button>}
               <p>{c.text}</p>
               {c.annotations?.length > 0 && (
                 <span className="caption">
@@ -252,6 +257,7 @@ export function FeedbackPanel({
             try {
               await write(`versions/${version.id}/comments/`, {
                 text: draft,
+                timestamp_seconds: version.media_kind === "video" ? videoTime : null,
                 annotations: shapes || [],
                 parent_id: reply,
                 request_id: commentKey.current,
@@ -281,10 +287,11 @@ export function FeedbackPanel({
             <p>{shapes?.length} annotation(s) ready to save.</p>
           )}
           <label htmlFor="new-comment">
-            Comment on version {version.number}
+            Comment on version {version.number}{version.media_kind === "video" && ` at ${videoTime.toFixed(1)}s`}
           </label>
           <Textarea
             id="new-comment"
+            onFocus={onPause}
             value={draft}
             onChange={(e) => {
               setDraft(version.id, e.target.value);

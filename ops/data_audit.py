@@ -9,13 +9,13 @@ from django.contrib.auth import get_user_model
 from proofs.models import Property, Group, Photo, Version, Comment, Profile
 
 report = {}
-exclude = {'last_login', 'review_revision', 'request_id', 'upload_request_id', 'review_settings', 'review_status', 'color_label', 'annotations', 'parent', 'clean_image', 'clean_thumb'}
+exclude = {'media_kind', 'processing', 'processing_error', 'processing_started', 'source_file', 'duration', 'timestamp_seconds', 'last_login', 'review_revision', 'request_id', 'upload_request_id', 'review_settings', 'review_status', 'color_label', 'annotations', 'parent', 'clean_image', 'clean_thumb'}
 for model in [get_user_model(), Profile, Property, Group, Photo, Version, Comment]:
     fields = [f.attname for f in model._meta.fields if f.name not in exclude]
     rows = list(model.objects.order_by('pk').values(*fields))
     payload = json.dumps(rows, sort_keys=True, default=str, separators=(',', ':')).encode()
     report[model.__name__] = {'count': len(rows), 'sha256': hashlib.sha256(payload).hexdigest()}
-files = sorted(Path(settings.MEDIA_ROOT).glob('*.jpg'))
+files = sorted(p for p in Path(settings.MEDIA_ROOT).iterdir() if p.is_file() and p.suffix in {'.jpg','.mp4'})
 payload = ''.join(p.name + hashlib.sha256(p.read_bytes()).hexdigest() for p in files).encode()
 report['proofs'] = {'count': len(files), 'sha256': hashlib.sha256(payload).hexdigest()}
 print(json.dumps(report, sort_keys=True))

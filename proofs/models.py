@@ -37,6 +37,12 @@ class Photo(models.Model):
  @builtins.property
  def latest(self):return self.versions.first()
 class Version(models.Model):
+ media_kind=models.CharField(max_length=8,default='image',db_default='image')
+ processing=models.CharField(max_length=12,default='ready',db_default='ready')
+ duration=models.FloatField(default=0,db_default=0)
+ source_file=models.CharField(max_length=100,blank=True,default='',db_default='')
+ processing_error=models.CharField(max_length=200,blank=True,default='',db_default='')
+ processing_started=models.DateTimeField(null=True,blank=True)
  clean_image=models.CharField(max_length=100,blank=True,db_default="")
  clean_thumb=models.CharField(max_length=100,blank=True,db_default="")
  id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
@@ -53,6 +59,7 @@ class Version(models.Model):
  class Meta:
   ordering=['-number'];constraints=[models.UniqueConstraint(fields=['photo','number'],name='version_photo_number')]
 class Comment(models.Model):
+ timestamp_seconds=models.FloatField(null=True,blank=True)
  annotations=models.JSONField(default=list,blank=True,db_default=[])
  parent=models.ForeignKey("self",null=True,blank=True,on_delete=models.CASCADE,related_name="replies")
  id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)

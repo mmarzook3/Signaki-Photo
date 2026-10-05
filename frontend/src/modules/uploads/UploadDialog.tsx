@@ -47,7 +47,7 @@ export function UploadDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add photographs</DialogTitle>
+          <DialogTitle>Add photos or videos</DialogTitle>
           <DialogDescription>
             Source uploads are converted to watermarked review copies.
           </DialogDescription>
@@ -108,13 +108,13 @@ export function UploadDialog({
             }}
           >
             <UploadCloud size={35} />
-            <strong>Drop photos here or choose files</strong>
-            <span>JPEG, PNG or WebP · up to 10 files</span>
+            <strong>Drop photos or videos here or choose files</strong>
+            <span>JPEG, PNG, WebP, MP4, MOV or WebM · up to 10 files</span>
             <input
               aria-label="Choose photographs"
               type="file"
               multiple
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.m4v"
               disabled={busy}
               onChange={(e) => {
                 setFiles(Array.from(e.target.files || []));
@@ -123,7 +123,7 @@ export function UploadDialog({
             />
           </label>
           <p className="caption">
-            25 MB per photo, 40 megapixels maximum. Total upload limit 64 MB.
+            Photos: 25 MB. Videos: 250 MB, up to 5 minutes. Total: 250 MB. Video previews process in the background.
           </p>
           {files.length > 0 && (
             <p>
@@ -139,10 +139,10 @@ export function UploadDialog({
               setResults([]);
               if (
                 files.length > 10 ||
-                files.some((f) => f.size > 25 * 1024 * 1024) ||
-                files.reduce((n, f) => n + f.size, 0) > 64 * 1024 * 1024
+                files.some((f) => f.size > (/\.(mp4|mov|m4v|webm)$/i.test(f.name) ? 250 : 25) * 1024 * 1024) ||
+                files.reduce((n, f) => n + f.size, 0) > 250 * 1024 * 1024
               ) {
-                setError("Choose up to 10 photos within the size limits.");
+                setError("Choose up to 10 files within the size limits.");
                 return;
               }
               const body = new FormData();
@@ -174,7 +174,7 @@ export function UploadDialog({
               }
             }}
           >
-            {busy ? "Processing watermarked proofs…" : "Upload photographs"}
+            {busy ? "Processing watermarked proofs…" : "Upload files"}
           </Button>
           {busy && (
             <p role="status" className="caption">

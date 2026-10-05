@@ -62,6 +62,7 @@ export function Gallery() {
   const result = useQuery({
     queryKey: ["gallery", propertyId],
     queryFn: () => api<GalleryData>(`properties/${propertyId}/`),
+    refetchInterval: (q) => q.state.data?.photos.some(p => p.latest?.processing === "queued" || p.latest?.processing === "processing") ? 3000 : false,
   });
   const update = (values: Partial<GallerySearch>) =>
     navigate({
@@ -421,7 +422,7 @@ function PhotoCard({ photo, search }: { photo: Photo; search: GallerySearch }) {
           loading="lazy"
           decoding="async"
         />
-        <span className="photo-version">v{photo.latest.number}</span>
+        <span className="photo-version">{photo.latest.media_kind === "video" ? "▶ Video · " : ""}v{photo.latest.number}{photo.latest.processing && photo.latest.processing !== "ready" ? ` · ${photo.latest.processing}` : ""}</span>
       </div>
       <div className="photo-caption">
         <strong title={photo.name}>{photo.name}</strong>

@@ -196,7 +196,7 @@ export function ReviewTools({
           Comment
         </Button>
       )}
-      {allowed("comments") && allowed("annotations") && (
+      {version.media_kind !== "video" && allowed("comments") && allowed("annotations") && (
         <Button
           className="review-pill"
           variant="ghost"
@@ -213,7 +213,7 @@ export function ReviewTools({
           <span>{panel ? "Hide feedback" : "Show feedback"}</span>
         </ViewerMenuItem>
         {photo.versions.length > 1 && (
-          <ViewerMenuItem onSelect={onCompare}>
+          <ViewerMenuItem onSelect={onCompare} disabled={version.media_kind === "video"}>
             <Columns2 />
             <span>{compare ? "Close comparison" : "Compare versions"}</span>
           </ViewerMenuItem>

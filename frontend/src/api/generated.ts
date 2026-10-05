@@ -387,6 +387,8 @@ export interface components {
             annotations?: unknown;
             /** Format: uuid */
             parent?: string | null;
+            /** Format: double */
+            timestamp_seconds?: number | null;
         };
         /**
          * @description * `approved` - Approved
@@ -397,6 +399,8 @@ export interface components {
          */
         CommentDecisionEnum: "approved" | "rejected" | "review" | "in_progress";
         CommentInput: {
+            /** Format: double */
+            timestamp_seconds?: number | null;
             annotations?: unknown;
             /** Format: uuid */
             parent_id?: string | null;
@@ -655,6 +659,11 @@ export interface components {
             review_revision?: number;
             readonly image_url: string;
             readonly thumb_url: string;
+            media_kind?: string;
+            processing?: string;
+            processing_error?: string;
+            /** Format: double */
+            duration?: number;
         };
     };
     responses: never;

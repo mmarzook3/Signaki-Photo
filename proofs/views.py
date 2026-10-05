@@ -132,6 +132,14 @@ def add_version(photo,upload,note=''):
    photo=Photo.objects.select_for_update().get(pk=photo.pk)
    number=(photo.versions.aggregate(n=Max('number'))['n'] or 0)+1
    label=f'{photo.name} · v{number}'
+   from .videos import is_video,queue_source
+   video=is_video(upload)
+   prior=photo.versions.first()
+   if prior and (prior.media_kind=='video')!=video:raise ValidationError('A replacement must have the same media type as the original.')
+   if video:
+    source,thumb,duration=queue_source(upload)
+    paths=[source,thumb]
+    return Version.objects.create(photo=photo,number=number,image='',thumb=thumb,label=label,note=note[:500],media_kind='video',processing='queued',source_file=source,duration=duration)
    paths=make_proofs(upload,label,store_clean=True)
    return Version.objects.create(photo=photo,number=number,image=paths[0],thumb=paths[1],clean_image=paths[2],clean_thumb=paths[3],label=label,note=note[:500])
  except Exception:
@@ -229,4 +237,7 @@ def proof(request,pk,size):
  except Exception:raise Http404
  path=review_path(v,size)
  if not path.is_file():raise Http404
+ if size=='image' and v.media_kind=='video':
+  from .video_stream import stream
+  return stream(request,path)
  response=FileResponse(path.open('rb'),content_type='image/jpeg');response['Content-Disposition']='inline; filename="review-proof.jpg"';return response
