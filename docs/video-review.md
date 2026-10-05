@@ -51,3 +51,29 @@ additive migration can remain while rolling back application code.
 Automated regression coverage: valid and invalid uploads, actual FFmpeg conversion,
 temporary-source deletion, byte ranges, customer isolation, timestamp validation,
 idempotent comments and feedback preservation across replacement versions.
+
+## Release verification — 5 October 2026
+
+Deployed application revision: `f88638c92736` at https://photo.signaki.com.
+The implementation was committed separately from viewer refinements.
+
+- 48 backend tests passed locally and in the isolated Linux staging image.
+- Five frontend tests, TypeScript/build and ESLint passed.
+- Browser checks passed for portrait and landscape playback, actual file upload,
+  replacement upload, earlier-version selection, timestamped comments, timestamp
+  seeking and mobile layout. No browser console errors in the production check.
+- An isolated production fixture passed HTTPS upload, background conversion,
+  authenticated partial-content playback, anonymous denial, timestamp comments,
+  and mandatory reasons for requests for changes. The fixture and its sessions
+  were removed afterwards. No client videos were added as part of this release.
+- Promotion preserved the existing 53 photos, 53 versions and 212 derivatives;
+  the existing customer-record/media audit was identical before and after release.
+- Encrypted backups were copied off-host, hash checked, decrypted in isolation,
+  and checked for SQLite integrity and every referenced media file. The backup
+  helper pauses only the dedicated video worker during its snapshot and resumes it;
+  running/unpaused state was verified after backup.
+- Observed idle memory: web approximately 109 MiB, worker 48 MiB. The worker has
+  a 768 MiB / one-CPU cap. Staging was stopped after validation.
+
+Not tested: shared-host reboot, sustained concurrent uploads, long-duration load
+or disk-full recovery. These are not claimed by the smoke tests above.
