@@ -39,7 +39,7 @@ import { filterPhotos, statuses } from "@/lib/gallery";
 const EMPTY_ROOMS: string[] = [];
 export interface GallerySearch {
   q?: string;
-  status?: Status | "all" | "unresolved";
+  status?: Status | "all" | "unresolved" | "revised";
   view?: "all" | "grouped";
   group?: string;
   compact?: boolean;
@@ -231,6 +231,16 @@ export function Gallery() {
                 <span>{photos.filter(p => (p.unresolved_feedback_count ?? 0) > 0).length}</span>
               </button>
             )}
+            <button
+              className={`filter-option ${search.status === "revised" ? "active" : ""}`}
+              aria-pressed={search.status === "revised"}
+              title="Photos and videos with a replacement version (v2 or later)"
+              onClick={() => update({ status: "revised" })}
+            >
+              <RefreshCw size={17} />
+              Revised media
+              <span>{photos.filter(p => p.latest && p.latest.number > 1).length}</span>
+            </button>
             {can(user.is_staff, property.review_settings, "favorites") && (
               <label className="setting-row">
                 <span>Favorites only</span>

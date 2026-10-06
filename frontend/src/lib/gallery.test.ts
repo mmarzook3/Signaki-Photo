@@ -7,6 +7,12 @@ const photos = [
   { id: "c", name: "Kitchen 03", group_id: null, latest: { status: "review" } },
 ] as Photo[];
 describe("gallery navigation scope", () => {
+  it("finds replacement versions independently of feedback and decisions", () => {
+    const items = photos.map((p, i) => ({ ...p, latest: { ...p.latest!, number: i + 1 }, unresolved_feedback_count: i === 2 ? 1 : 0 }));
+    expect(filterPhotos(items, "", "revised").map(p => p.id)).toEqual(["b", "c"]);
+    expect(filterPhotos(items, "kitchen", "revised").map(p => p.id)).toEqual(["c"]);
+    expect(filterPhotos(items, "", "unresolved").map(p => p.id)).toEqual(["c"]);
+  });
   it("filters unresolved feedback independently of the review decision", () => {
     const items = photos.map((p, i) => ({ ...p, unresolved_feedback_count: i < 2 ? 2 : 0 }));
     expect(filterPhotos(items, "", "unresolved").map(p => p.id)).toEqual(["a", "b"]);

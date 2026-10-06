@@ -14,7 +14,9 @@ export function filterPhotos(photos: Photo[], search: string, status: string) {
       p.name.toLowerCase().includes(query) &&
       (status === "unresolved"
         ? (p.unresolved_feedback_count ?? 0) > 0
-        : status === "all" || p.latest.status === status),
+        : status === "revised"
+          ? p.latest.number > 1
+          : status === "all" || p.latest.status === status),
   );
 }
 export function sequence(photos: Photo[], group?: string) {
