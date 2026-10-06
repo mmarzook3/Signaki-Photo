@@ -23,6 +23,7 @@ import {
   RefreshCw,
   X,
   Filter,
+  MessageCircle,
 } from "lucide-react";
 import { api, message } from "@/api/client";
 import type { Gallery as GalleryData, Photo, Status } from "@/api/types";
@@ -38,7 +39,7 @@ import { filterPhotos, statuses } from "@/lib/gallery";
 const EMPTY_ROOMS: string[] = [];
 export interface GallerySearch {
   q?: string;
-  status?: Status | "all";
+  status?: Status | "all" | "unresolved";
   view?: "all" | "grouped";
   group?: string;
   compact?: boolean;
@@ -218,6 +219,18 @@ export function Gallery() {
                 </button>
               );
             })}
+            {can(user.is_staff, property.review_settings, "comments") && (
+              <button
+                className={`filter-option ${search.status === "unresolved" ? "active" : ""}`}
+                aria-pressed={search.status === "unresolved"}
+                title="Media with unresolved comments, including earlier visible versions"
+                onClick={() => update({ status: "unresolved" })}
+              >
+                <MessageCircle size={17} />
+                Unresolved feedback
+                <span>{photos.filter(p => (p.unresolved_feedback_count ?? 0) > 0).length}</span>
+              </button>
+            )}
             {can(user.is_staff, property.review_settings, "favorites") && (
               <label className="setting-row">
                 <span>Favorites only</span>
@@ -436,6 +449,9 @@ function PhotoCard({ photo, search }: { photo: Photo; search: GallerySearch }) {
         )}
       </div>
       <StatusBadge status={photo.latest.status} />
+      {(photo.unresolved_feedback_count ?? 0) > 0 && (
+        <span className="caption">{photo.unresolved_feedback_count} unresolved comment{photo.unresolved_feedback_count === 1 ? "" : "s"}</span>
+      )}
     </Link>
   );
 }

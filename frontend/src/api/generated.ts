@@ -563,6 +563,7 @@ export interface components {
             readonly versions: components["schemas"]["Version"][];
             readonly favorite: boolean;
             color_label?: string;
+            readonly unresolved_feedback_count: number;
         };
         PhotoResponse: {
             photo: components["schemas"]["Photo"];

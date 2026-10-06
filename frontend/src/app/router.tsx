@@ -65,7 +65,7 @@ const root = createRootRoute({
 const searchSchema = z.object({
   q: z.string().optional(),
   status: z
-    .enum(["all", "pending", "approved", "rejected", "review", "in_progress"])
+    .enum(["all", "pending", "approved", "rejected", "review", "in_progress", "unresolved"])
     .optional(),
   view: z.enum(["all", "grouped"]).optional(),
   group: z.string().optional(),

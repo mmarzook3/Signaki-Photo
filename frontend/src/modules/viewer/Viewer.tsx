@@ -48,7 +48,7 @@ export function Viewer() {
   const [color, setColor] = useState<Annotation["color"]>("#4f5bff");
   const shapes = useDrafts((s) => s.shapes);
   const setShapes = useDrafts((s) => s.setShapes);
-  const [panel, setPanel] = useState(false);
+  const [panel, setPanel] = useState(search.status === "unresolved");
   const [filmstrip, setFilmstrip] = useState(false);
   const [conversation, setConversation] = useState<string | null>(null);
   const [compare, setCompare] = useState(false);

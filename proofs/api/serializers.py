@@ -36,6 +36,16 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class PhotoSerializer(serializers.ModelSerializer):
+    unresolved_feedback_count = serializers.SerializerMethodField()
+
+    def get_unresolved_feedback_count(self, obj) -> int:
+        request = self.context.get('request')
+        if not request or not allowed(request.user, obj.property, 'comments'):
+            return 0
+        versions = list(obj.versions.all())
+        if not allowed(request.user, obj.property, 'versioning'):
+            versions = versions[:1]
+        return sum(len(getattr(v, 'unresolved_feedback', [])) for v in versions)
     property_id = serializers.UUIDField(read_only=True)
     group_id = serializers.IntegerField(read_only=True, allow_null=True)
     latest = serializers.SerializerMethodField()
@@ -56,7 +66,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ['id', 'property_id', 'name', 'group_id', 'position', 'hidden', 'latest', 'versions', 'favorite', 'color_label']
+        fields = ['id', 'property_id', 'name', 'group_id', 'position', 'hidden', 'latest', 'versions', 'favorite', 'color_label', 'unresolved_feedback_count']
 
     @extend_schema_field(VersionSerializer(allow_null=True))
     def get_latest(self, obj):

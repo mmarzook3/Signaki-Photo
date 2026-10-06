@@ -44,6 +44,11 @@ def property_queryset(request):
     )
 
 
+def feedback_prefetch():
+    # Load only identifiers, not comment text, and avoid one query per media item.
+    return Prefetch('versions__comments', queryset=Comment.objects.filter(resolved=False).only('id', 'version_id'), to_attr='unresolved_feedback')
+
+
 @method_decorator(csrf_protect, name='dispatch')
 @extend_schema_view(get=extend_schema(responses=SessionResponse), post=extend_schema(responses=SessionResponse), delete=extend_schema(responses={200: {"type": "object"}}))
 class Session(APIView):
@@ -109,7 +114,7 @@ class PropertyDetail(APIView):
 
     def get(self, request, pk):
         obj = get_object_or_404(property_queryset(request), pk=pk)
-        images = photos(request).filter(property=obj).select_related('group','property').prefetch_related('versions','favorites')
+        images = photos(request).filter(property=obj).select_related('group','property').prefetch_related('versions','favorites',feedback_prefetch())
         return Response({
             'property': PropertySerializer(obj, context={'request': request}).data,
             'groups': GroupSerializer(obj.groups.all(), many=True).data,
@@ -151,7 +156,7 @@ class PhotoDetail(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        obj = get_object_or_404(photos(request).select_related('property', 'group').prefetch_related('versions','favorites'), pk=pk)
+        obj = get_object_or_404(photos(request).select_related('property', 'group').prefetch_related('versions','favorites',feedback_prefetch()), pk=pk)
         comments = Comment.objects.filter(version__photo=obj).select_related('version__photo__property', 'author')
         if not allowed(request.user, obj.property, 'comments'):
             comments = comments.none()

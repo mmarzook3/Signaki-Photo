@@ -1392,6 +1392,9 @@ components:
         color_label:
           type: string
           maxLength: 12
+        unresolved_feedback_count:
+          type: integer
+          readOnly: true
       required:
       - favorite
       - group_id
@@ -1399,6 +1402,7 @@ components:
       - latest
       - name
       - property_id
+      - unresolved_feedback_count
       - versions
     PhotoResponse:
       type: object

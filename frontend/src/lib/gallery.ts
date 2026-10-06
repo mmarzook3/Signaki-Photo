@@ -12,7 +12,9 @@ export function filterPhotos(photos: Photo[], search: string, status: string) {
     (p) =>
       p.latest &&
       p.name.toLowerCase().includes(query) &&
-      (status === "all" || p.latest.status === status),
+      (status === "unresolved"
+        ? (p.unresolved_feedback_count ?? 0) > 0
+        : status === "all" || p.latest.status === status),
   );
 }
 export function sequence(photos: Photo[], group?: string) {
