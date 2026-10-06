@@ -450,7 +450,7 @@ function PhotoCard({ photo, search }: { photo: Photo; search: GallerySearch }) {
       </div>
       <StatusBadge status={photo.latest.status} />
       {(photo.unresolved_feedback_count ?? 0) > 0 && (
-        <span className="caption">{photo.unresolved_feedback_count} unresolved comment{photo.unresolved_feedback_count === 1 ? "" : "s"}</span>
+        <span className="caption block mt-2">{photo.unresolved_feedback_count} unresolved comment{photo.unresolved_feedback_count === 1 ? "" : "s"}</span>
       )}
     </Link>
   );
