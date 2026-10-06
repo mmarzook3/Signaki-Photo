@@ -27,3 +27,9 @@ The deployment's before/after customer-record and media audit was identical.
 
 Application release: `f12d88ddf268`. Prior image: `f88638c92736`; existing deployment
 rollback procedures apply, with no schema changes to reverse.
+
+## Revised media
+
+The separate Revised media filter (`?status=revised`) shows visible items whose latest version number is greater than one. It finds actual replacement uploads independently of resolved comments or approval state, and includes both photos and videos. Filename search and viewer/back navigation preserve the filter.
+
+Release `008966adb8c6`, 6 October 2026: seven frontend tests, build and lint passed; staging browser checks covered filter count, refresh persistence and version/back navigation. Production read-only verification passed; before/after persistent-data audit was identical. No schema changes.
